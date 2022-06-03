@@ -1,0 +1,25 @@
+{
+  "name": "spongecoin",
+  "version": "1.0.0",
+  "description": "Major Project",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker-run": "docker-compose up",
+    "docker-run-rebuild": "docker-compose up --build",
+    "docker-run-detached": "docker-compose up -d",
+    "docker-run-rebuild-detached": "docker-compose up --build -d",
+    "docker-stop": "docker-compose down",
+    "swarm-run": "docker stack deploy --compose-file docker-compose.yml spongecoin",
+    "swarm-stop": "docker stack rm spongecoin"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subramanya9112/spongecoin.git"
+  },
+  "author": "subramanya9112",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/subramanya9112/spongecoin/issues"
+  },
+  "homepage": "https://github.com/subramanya9112/spongecoin#readme"
+}
