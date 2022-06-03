@@ -1,0 +1,3 @@
+# Sponge Coin
+
+Major project
