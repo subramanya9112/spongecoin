@@ -1,50 +1,53 @@
+import React from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
+import Client from './components/Client';
+import Miner from './components/Miner';
 import { RSA, Crypt } from 'hybrid-crypto-js';
-import logo from './logo.svg';
-import './App.css';
-import { useEffect } from 'react';
+import './App.scss';
 
 function App() {
-  useEffect(() => {
-    var rsa = new RSA();
-    rsa.generateKeyPair((key) => {
-      const publicKey = key.publicKey;
-      const privateKey = key.privateKey;
-      console.log(publicKey);
-      console.log(privateKey);
+  const location = useLocation();
+  // useEffect(() => {
+  //   var rsa = new RSA();
+  //   rsa.generateKeyPair((key) => {
+  //     const publicKey = key.publicKey;
+  //     const privateKey = key.privateKey;
+  //     console.log(publicKey);
+  //     console.log(privateKey);
 
-      var crypt = new Crypt({
-        md: 'sha512',
-      });
+  //     var crypt = new Crypt({
+  //       md: 'sha512',
+  //     });
 
-      var message = 'Hello world!';
-      var signature = crypt.signature(privateKey, message);
-      console.log(signature)
-      var verified = crypt.verify(
-        publicKey,
-        signature,
-        message,
-      );
-      console.log(verified);
-    });
-  }, []);
+  //     var message = 'Hello world!';
+  //     var signature = crypt.signature(privateKey, message);
+  //     console.log(signature)
+  //     var verified = crypt.verify(
+  //       publicKey,
+  //       signature,
+  //       message,
+  //     );
+  //     console.log(verified);
+  //   });
+  // }, []);
 
-  console.log(process.env.REACT_APP_SOMETHING)
+  // console.log(process.env.REACT_APP_SOMETHING)
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+      <SwitchTransition className="transition" mode="out-in">
+        <CSSTransition
+          key={location.key}
+          timeout={450}
+          classNames="fade"
         >
-          Learn React
-        </a>
-      </header>
+          <Routes location={location}>
+            <Route path="*" element={<Client />} />
+            <Route path="miner/*" element={<Miner />} />
+          </Routes>
+        </CSSTransition>
+      </SwitchTransition>
     </div>
   );
 }

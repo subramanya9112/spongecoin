@@ -1,0 +1,2 @@
+DATA_PATH = "./"
+TIME_TO_MINE = 15 * 60
