@@ -1,2 +1,2 @@
-DATA_PATH = "./"
+DATA_PATH = "./db"
 TIME_TO_MINE = 15 * 60

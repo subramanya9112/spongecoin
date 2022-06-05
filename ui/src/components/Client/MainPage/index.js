@@ -1,7 +1,10 @@
-import React from 'react'
+import React from 'react';
+import Header from './../Header';
 
 export default function Index() {
     return (
-        <div>MainPage</div>
+        <div>
+            <Header />
+        </div>
     )
 }
