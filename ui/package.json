@@ -9,6 +9,7 @@
     "axios": "^0.27.2",
     "hybrid-crypto-js": "^0.2.4",
     "node-sass": "^7.0.1",
+    "parse-domain": "^7.0.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "^6.3.0",

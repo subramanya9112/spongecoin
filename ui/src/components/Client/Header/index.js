@@ -27,8 +27,7 @@ export default function Index() {
           <NavLink to="/explorer" className="listitem hover-underline-animation">Explorer</NavLink>
           {loggedIn ?
             <Fragment>
-              <NavLink to="/transact" className="listitem hover-underline-animation">Transact</NavLink>
-              <NavLink to="/transaction" className="listitem hover-underline-animation">Transactions</NavLink>
+              <NavLink to="/transaction" className="listitem hover-underline-animation">Account</NavLink>
               <div className="listitem hover-underline-animation" onClick={() => {
                 setLoggedIn(false);
                 window.localStorage.removeItem('sponge_coin_public_key');
