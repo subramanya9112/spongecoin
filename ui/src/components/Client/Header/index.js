@@ -1,13 +1,14 @@
 import React, { useEffect, Fragment } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import "./index.scss";
 
 export default function Index() {
   const [loggedIn, setLoggedIn] = React.useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let pub_key = window.localStorage.getItem('sponge_coin_public_key');
-    if (pub_key == null) {
+    if (pub_key) {
       setLoggedIn(true);
     } else {
       setLoggedIn(false);
@@ -17,7 +18,9 @@ export default function Index() {
   return (
     <div className="header">
       <div className="linklist">
-        <div className="title">SPONGE COIN</div>
+        <div className="title" onClick={() => {
+          navigate('/');
+        }}>SPONGE COIN</div>
         <ul className="nav-links">
           <NavLink to="/create_account" className="listitem hover-underline-animation">Create Account</NavLink>
           <NavLink to="/get_public_key" className="listitem hover-underline-animation">Get public key</NavLink>

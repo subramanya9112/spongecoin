@@ -35,7 +35,7 @@ function App() {
   // console.log(process.env.REACT_APP_SOMETHING)
 
   return (
-    <div className="App">
+    <div className="app">
       {/* <SwitchTransition className="transition" mode="out-in">
         <CSSTransition
           key={location.key}

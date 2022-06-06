@@ -1,7 +1,9 @@
 .header {
     background-color: black;
     margin: 0;
-    padding: 0px 40px 0px 40px;
+    padding: 0px 20px 0px 20px;
+    width: calc(100% - 40px);
+    height: 75px;
 }
 
 .title {
@@ -14,6 +16,7 @@
     background: linear-gradient(250deg, #F30E23, #df6589, #003bfa, #e6a52d, #ca5913, #71cd46);
     -webkit-text-fill-color: transparent;
     -webkit-background-clip: text;
+    cursor: pointer;
 }
 
 .nav-links {
@@ -23,7 +26,6 @@
 .linklist {
     display: flex;
     justify-content: space-between;
-    flex: 1;
 }
 
 .listitem {

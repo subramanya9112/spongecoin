@@ -1,20 +1,23 @@
 import React from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
-import { CSSTransition, SwitchTransition } from 'react-transition-group';
+import { Route, Routes } from 'react-router-dom';
 import MainPage from './MainPage';
 import CreateAccount from './CreateAccount';
+import GetPublicKey from './GetPublicKey';
+import Explorer from './Explorer';
+import Transact from './Transact';
+import Transaction from './Transaction';
+import Login from './Login';
 
 export default function Index() {
-    const location = useLocation();
-
     return (
         <Routes >
-            {/* <Route path="/singleAnalysis" component={SingleAnalysis} />
-                <Route path="/fileAnalysis" component={FileAnalysis} />
-                <Route path="/info" component={Info} />
-                <Route path="/developer" component={Developer} />*/}
             <Route path={`/`} element={<MainPage />} />
             <Route path={`/create_account`} element={<CreateAccount />} />
+            <Route path={`/get_public_key`} element={<GetPublicKey />} />
+            <Route path={`/explorer/*`} element={<Explorer />} />
+            <Route path={`/transact`} element={<Transact />} />
+            <Route path={`/transaction`} element={<Transaction />} />
+            <Route path={`/login`} element={<Login />} />
             <Route path={`/*`} element={<div>Error from client</div>} />
         </Routes>
     )
