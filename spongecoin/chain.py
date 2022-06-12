@@ -13,16 +13,13 @@ class Chain:
         pass
 
     def create_block(self):
-        od = OrderedDict()
-        od['magic_number'] = 0xD9B4BEF9
-        od['block_size'] = 1
-        od['block_header'] = OrderedDict()
-        od['block_header']['version'] = 1
-        od['block_header']['previousBlockHash'] = 1
-        od['block_header']['merkleRoot'] = 1
-        od['block_header']['timestamp'] = 1
-        od['block_header']['difficultyTarget'] = 1
-        od['block_header']['Nonce'] = 1
+        od = {}
+        od['version'] = 1
+        od['previousBlockHash'] = 1
+        od['merkleRoot'] = 1
+        od['timestamp'] = 1
+        od['difficultyTarget'] = 1
+        od['Nonce'] = 1
         od['transaction_length'] = 1
         od['transactions'] = self.pending_transactions
 

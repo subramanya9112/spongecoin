@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { parseDomain, ParseResultType } from 'parse-domain';
 import "./index.scss";
 
-export default function Index() {
+export default function Index({ style, content }) {
   const navigate = useNavigate();
   const start = false;
 
@@ -25,18 +25,24 @@ export default function Index() {
   })
 
   return (
-    <div className="header">
-      <div className="linklist">
-        <div className="title" onClick={() => {
-          navigate('/miner');
-        }}>SPONGE COIN</div>
-        {start ?
-          <></> :
-          <ul className="nav-links">
-            <NavLink to="/miner/my_mined_blocks" className="listitem hover-underline-animation">Mined blocks</NavLink>
-            <NavLink to="/client" className="listitem hover-underline-animation">Client</NavLink>
-          </ul>}
+    <div style={{ height: "100%", width: "100%" }}>
+      <div className="header">
+        <div className="linklist">
+          <div className="title" onClick={() => {
+            navigate('/miner');
+          }}>SPONGE COIN</div>
+          {start ?
+            <></> :
+            <ul className="nav-links">
+              <NavLink to="/miner/chain_change" className="listitem hover-underline-animation">Chain Change</NavLink>
+              <NavLink to="/miner/my_mined_blocks" className="listitem hover-underline-animation">Mined blocks</NavLink>
+              <NavLink to="/client" className="listitem hover-underline-animation">Client</NavLink>
+            </ul>}
+        </div>
       </div>
-    </div>
+      <div style={{ height: "calc(100% - 75px)", width: "100%", ...style }}>
+        {content}
+      </div>
+    </div >
   )
 }

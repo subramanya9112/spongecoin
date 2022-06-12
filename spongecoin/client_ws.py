@@ -1,5 +1,4 @@
 import socketio
-import time
 
 
 class ClientWS:
@@ -39,11 +38,3 @@ class ClientWS:
 
     def disconnect(self):
         self.sio.disconnect()
-
-
-client = ClientWS()
-client.connect("http://localhost:3000")
-time.sleep(5)
-client.disconnect()
-client.connect("http://localhost:5000")
-client.disconnect()
