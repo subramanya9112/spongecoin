@@ -10,7 +10,6 @@ app.config['SECRET_KEY'] = 'secret'
 socketio = SocketIO(app)
 
 client = ClientWS()
-client.connect(variables.REFLECTOR_URL)
 chain = None
 
 
@@ -26,6 +25,9 @@ def start():
             return {"status": variables.STARTED}
 
         data = request.get_json()
+        
+        client.connect(variables.REFLECTOR_URL)
+        
         pub_key = data['pub_key']
         chain = data['chain']
         should_verify = data['should_verify']
