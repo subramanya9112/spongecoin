@@ -84,15 +84,18 @@ Transaction
     sender_pub_key
     timestamp
     ins
-        [transaction_id]
+        [{
+            inId
+            amount
+        }]
     outs
         [{
             type:transfer
-            id:id
+            outId:outId
             amount
             receiver_pub_key
         }, {
             type:reward
-            id:id
+            outId:outId
             amount
         }]

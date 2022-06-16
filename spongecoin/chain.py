@@ -1,12 +1,12 @@
-from threading import Timer
-import random
-from Crypto.PublicKey import RSA
-from Crypto.Hash import SHA256, SHA512
-from Crypto.Signature import PKCS1_v1_5
-import json
-import time
-
+from itertools import chain
 from transaction import Transaction
+import time
+import json
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+import random
+from threading import Timer, Thread
 
 
 class Chain:
@@ -77,10 +77,7 @@ class Chain:
         halvings = len(self.chain) / self.subsidyHalvingInterval
         return self.subsidy // (2 ** halvings)
 
-    def mine(self) -> None:
-        if self.timer != None:
-            self.timer.cancel()
-
+    def _mine(self) -> None:
         # if the no_of_block % adjust_after_block == 0, set the difficulty target to the next difficulty target
         # TODO: check this once
         if len(self.chain) != 0 and len(self.chain) % self.adjustAfterBlocks == 0:
@@ -88,27 +85,62 @@ class Chain:
                 (self.chain[-1]['timestamp']-self.chain[-self.adjustAfterBlocks]['timestamp']) /
                 (self.adjustAfterBlocks*self.timeForEachBlock)
             )
+            print("New difficulty target: " + str(self.difficultyTarget))
 
-        self.pending_transactions(Transaction.GetCoinBaseTransaction(
+        self.pending_transactions.insert(0, Transaction.GetCoinBaseTransaction(
             subsidy=self.calculateSubsidy(),
             pub_key=self.pub_key,
         ))
 
         # Create a block
         block = self.create_block()
+        self.pending_transactions = []
 
         # Mine the block
         while True:
             block['nonce'] = random.getrandbits(128)
-            hash = int(SHA512.new(str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
+            hash = int(SHA256.new(str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
             if hash < self.difficultyTarget:
                 break
 
         self.chain.append(block)
+        print("Block mined")
         # TODO: Send to all
 
         self._timer = Timer(self.maximum_time, self.mine)
         self._timer.start()
+
+    def mine(self) -> None:
+        if self.timer != None:
+            self.timer.cancel()
+
+        t = Thread(target=self._mine)
+        t.start()
+
+    def addTransaction(self, transactions, transaction, pub_key, coinbase):
+        if transaction['type'] == "Transaction":
+            if transaction['sender_pub_key'] == pub_key:
+                for inTransaction in transaction['in']:
+                    if inTransaction['inId']:
+                        del transaction['inId']
+            for outTransaction in transaction['out']:
+                if outTransaction['type'] == "transfer":
+                    if outTransaction['receiver_pub_key'] == pub_key:
+                        transactions[outTransaction['outId']] = outTransaction['amount']
+                elif outTransaction['type'] == "reward":
+                    if coinbase['pub_key'] == pub_key:
+                        transactions[outTransaction['outId']] = outTransaction['amount']
+
+    def getAvailableTransactions(self, pub_key):
+        # dict of txn_id -> amount
+        transactions = {}
+        for block in self.chain:
+            coinbase = block['transactions'][0]
+            if coinbase['pub_key'] == pub_key:
+                transactions[coinbase['transactionId']] = coinbase['subsidy']
+            for transaction in block['transactions'][1:]:
+                self.addTransaction(transactions, transaction, pub_key, coinbase)
+        return transactions
 
     def on_transaction(self, transaction) -> bool:
         # Verify the transaction signature
@@ -125,11 +157,20 @@ class Chain:
         transaction['signature'] = signature
 
         # Verify has balance using the chain data and also the pending_transactions
+        transactions = self.getAvailableTransactions(transaction['pub_key'])
+        for pendingTransaction in self.pending_transactions:
+            self.addTransaction(transactions, pendingTransaction, transaction['pub_key'], {'pub_key': None})
+
+        for tranx in transaction['in']:
+            if tranx['inId'] not in transactions:
+                return False
+            if tranx['amount'] != transactions[tranx['inId']]:
+                return False
 
         # Add the transaction to the pending transactions
         self.pending_transactions.append(Transaction.GetTransaction(transaction))
 
-        # TODO: if transaction_fee is not enough, return
+        # If transaction_fee is not enough return, else call mine
         self.pending_transactions_fee += 0
         if self.pending_transactions_fee > self.minimum_fee:
             Timer(0, self.mine).start()
@@ -137,10 +178,12 @@ class Chain:
         return True
 
     def create_block(self):
-        od = {}
-        od['version'] = 1
-        od['previousBlockHash'] = SHA512.new(str(json.dumps(self.chain[-1])).encode('utf-8')).hexdigest() if len(self.chain) > 1 else "0"
-        od['timestamp'] = time.time()
-        od['difficultyTarget'] = self.difficultyTarget
-        od['no_transaction'] = len(self.pending_transactions)
-        od['transactions'] = self.pending_transactions
+        block = {}
+        block['version'] = 1
+        block['previousBlockHash'] = SHA256.new(str(json.dumps(self.chain[-1])).encode('utf-8')).hexdigest() if len(self.chain) > 1 else "0"
+        block['timestamp'] = time.time()
+        block['difficultyTarget'] = self.difficultyTarget
+        block['height'] = len(chain) + 1
+        block['num_transaction'] = len(self.pending_transactions)
+        block['transactions'] = self.pending_transactions
+        return block
