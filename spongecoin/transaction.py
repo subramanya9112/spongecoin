@@ -1,6 +1,9 @@
+import uuid
+
+
 class Transaction:
     @staticmethod
-    def GetGenesisBlock(
+    def GetGenesisTransaction(
         totalCoins,
         difficultyTarget,
         adjustAfterBlocks,
@@ -16,24 +19,28 @@ class Transaction:
             "timeForEachBlock": timeForEachBlock,
             "subsidy": subsidy,
             "subsidyHalvingInterval": subsidyHalvingInterval,
+            "transactionId": uuid.uuid4().hex,
         }
 
     @staticmethod
-    def GetCoinBaseTransaction(coins, pub_key):
+    def GetCoinBaseTransaction(subsidy, pub_key):
         return {
             "type": "CoinBaseTransaction",
-            "coins": coins,
+            "subsidy": subsidy,
             "pub_key": pub_key,
+            "transactionId": uuid.uuid4().hex,
         }
 
     @staticmethod
     def GetSideChainCreateTransaction():
         return {
             "type": "SideChainCreateTransaction",
+            # TODO: Add some data here
+            "transactionId": uuid.uuid4().hex,
         }
 
     @staticmethod
-    def GetTransaction():
-        return {
-            "type": "Transaction",
-        }
+    def GetTransaction(transaction):
+        transaction["type"] = "Transaction"
+        transaction["transactionId"] = uuid.uuid4().hex
+        return transaction

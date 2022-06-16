@@ -74,3 +74,25 @@ Needed variables
     pub_key
     minimum_fee
     maximum_time
+
+
+Transaction
+    type
+    transaction_number
+    signature
+  Signing check  
+    sender_pub_key
+    timestamp
+    ins
+        [transaction_id]
+    outs
+        [{
+            type:transfer
+            id:id
+            amount
+            receiver_pub_key
+        }, {
+            type:reward
+            id:id
+            amount
+        }]

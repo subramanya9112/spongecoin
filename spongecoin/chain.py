@@ -1,6 +1,8 @@
-import Timer
+from threading import Timer
 import random
-import hashlib
+from Crypto.PublicKey import RSA
+from Crypto.Hash import SHA256, SHA512
+from Crypto.Signature import PKCS1_v1_5
 import json
 import time
 
@@ -12,18 +14,19 @@ class Chain:
         self.chain = []
         self.pending_transactions = []
         self.pending_transactions_fee = 0
+
         self.difficultyTarget = None
         self.adjustAfterBlocks = None
         self.timeForEachBlock = None
+
         self.subsidy = None
         self.subsidyHalvingInterval = None
+
         self.pub_key = None
         self.minimum_fee = None
         self.maximum_time = None
         self.client = None
         self.timer = None
-
-        self.sha512 = hashlib.sha512()
 
     def startSpongeChain(
             self,
@@ -49,7 +52,7 @@ class Chain:
         self.client = client
 
         # Create genesis block
-        self.pending_transactions.append(Transaction.GetGenesisBlock(
+        self.pending_transactions.append(Transaction.GetGenesisTransaction(
             totalCoins=totalCoins,
             difficultyTarget=difficultyTarget,
             adjustAfterBlocks=adjustAfterBlocks,
@@ -70,17 +73,26 @@ class Chain:
         # TODO: start the timer
         pass
 
+    def calculateSubsidy(self) -> int:
+        halvings = len(self.chain) / self.subsidyHalvingInterval
+        return self.subsidy // (2 ** halvings)
+
     def mine(self) -> None:
         if self.timer != None:
             self.timer.cancel()
 
         # if the no_of_block % adjust_after_block == 0, set the difficulty target to the next difficulty target
+        # TODO: check this once
         if len(self.chain) != 0 and len(self.chain) % self.adjustAfterBlocks == 0:
-            self.difficultyTarget *= (1)
-            # TODO: adjust the difficulty target
-            pass
+            self.difficultyTarget *= (
+                (self.chain[-1]['timestamp']-self.chain[-self.adjustAfterBlocks]['timestamp']) /
+                (self.adjustAfterBlocks*self.timeForEachBlock)
+            )
 
-        # TODO: Add a coin base transaction to the pending transactions
+        self.pending_transactions(Transaction.GetCoinBaseTransaction(
+            subsidy=self.calculateSubsidy(),
+            pub_key=self.pub_key,
+        ))
 
         # Create a block
         block = self.create_block()
@@ -88,36 +100,47 @@ class Chain:
         # Mine the block
         while True:
             block['nonce'] = random.getrandbits(128)
-            hash = self.sha512.update(str(json.dumps(block)).encode('utf-8'))
+            hash = int(SHA512.new(str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
             if hash < self.difficultyTarget:
                 break
 
         self.chain.append(block)
         # TODO: Send to all
 
-        self._timer = Timer(self.maximum_time, self._run)
+        self._timer = Timer(self.maximum_time, self.mine)
         self._timer.start()
 
-    def on_transaction(self, transaction) -> None:
-        # TODO: verify the transaction signature
+    def on_transaction(self, transaction) -> bool:
+        # Verify the transaction signature
+        pub_key = RSA.import_key(transaction['pub_key'])
+        signature = transaction['signature']
+        del transaction['signature']
+        hash_verify = PKCS1_v1_5.new(pub_key)
+        try:
+            hash_verify.verify(SHA256.new(data=json.dumps(transaction)), signature=signature)
+        except Exception as e:
+            print(e)
+            return False
 
-        # TODO: verify has balance using the chain data and also the pending_transactions
+        transaction['signature'] = signature
 
-        # TODO: add the transaction to the pending transactions
+        # Verify has balance using the chain data and also the pending_transactions
+
+        # Add the transaction to the pending transactions
+        self.pending_transactions.append(Transaction.GetTransaction(transaction))
 
         # TODO: if transaction_fee is not enough, return
+        self.pending_transactions_fee += 0
+        if self.pending_transactions_fee > self.minimum_fee:
+            Timer(0, self.mine).start()
 
-        # TODO: else call mine
-        pass
+        return True
 
     def create_block(self):
-        # TODO: create a block
         od = {}
         od['version'] = 1
-        od['previousBlockHash'] = 1
-        od['merkleRoot'] = 1
+        od['previousBlockHash'] = SHA512.new(str(json.dumps(self.chain[-1])).encode('utf-8')).hexdigest() if len(self.chain) > 1 else "0"
         od['timestamp'] = time.time()
-        od['difficultyTarget'] = 1
-        od['nonce'] = 1
-        od['transaction_length'] = 1
+        od['difficultyTarget'] = self.difficultyTarget
+        od['no_transaction'] = len(self.pending_transactions)
         od['transactions'] = self.pending_transactions
