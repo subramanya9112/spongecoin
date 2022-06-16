@@ -60,3 +60,17 @@ start the mainchain
 time for each block
 difficulty target
 pub_key
+
+Needed variables
+    totalCoins
+    difficultyTarget
+    adjustAfterBlocks
+    timeForEachBlock
+    
+    subsidy
+    subsidyHalvingInterval
+    completion on -> calculated on ui
+
+    pub_key
+    minimum_fee
+    maximum_time

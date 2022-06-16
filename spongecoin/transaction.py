@@ -1,23 +1,39 @@
-import enum
-
-
-class TransactionType(enum.Enum):
-    GenesisBlock = 1
-    CoinBaseTransaction = 2
-    Transaction = 3
-    CreateSideChain = 3
-
-
 class Transaction:
     @staticmethod
-    def GetTransaction(
-        type
+    def GetGenesisBlock(
+        totalCoins,
+        difficultyTarget,
+        adjustAfterBlocks,
+        timeForEachBlock,
+        subsidy,
+        subsidyHalvingInterval,
     ):
-        if type == TransactionType.GenesisBlock:
-            return {}
-        elif type == TransactionType.CoinBaseTransaction:
-            return {}
-        elif type == TransactionType.Transaction:
-            return {}
-        elif type == TransactionType.CreateSideChain:
-            return {}
+        return {
+            "type": "GenesisBlock",
+            "totalCoins": totalCoins,
+            "difficultyTarget": difficultyTarget,
+            "adjustAfterBlocks": adjustAfterBlocks,
+            "timeForEachBlock": timeForEachBlock,
+            "subsidy": subsidy,
+            "subsidyHalvingInterval": subsidyHalvingInterval,
+        }
+
+    @staticmethod
+    def GetCoinBaseTransaction(coins, pub_key):
+        return {
+            "type": "CoinBaseTransaction",
+            "coins": coins,
+            "pub_key": pub_key,
+        }
+
+    @staticmethod
+    def GetSideChainCreateTransaction():
+        return {
+            "type": "SideChainCreateTransaction",
+        }
+
+    @staticmethod
+    def GetTransaction():
+        return {
+            "type": "Transaction",
+        }

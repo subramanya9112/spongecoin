@@ -6,6 +6,7 @@ import './index.scss';
 //      public key
 //      difficulty target
 //      seconds for each block
+//      number of coins can be mined
 
 export default function Index() {
     return (
