@@ -9,7 +9,7 @@ import Login from './Login';
 
 export default function Index() {
     return (
-        <Routes >
+        <Routes>
             <Route path={`/`} element={<MainPage />} />
             <Route path={`/create_account`} element={<CreateAccount />} />
             <Route path={`/explorer/*`} element={<Explorer />} />
