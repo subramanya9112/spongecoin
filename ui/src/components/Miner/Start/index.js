@@ -2,16 +2,23 @@ import React from 'react';
 import Header from './../Header';
 import './index.scss';
 
-// create main chain
-//      public key
-//      difficulty target
-//      seconds for each block
-//      number of coins can be mined
+// totalCoins = data['totalCoins']
+// difficultyTarget = data['difficultyTarget']
+// adjustAfterBlocks = data['adjustAfterBlocks']
+// timeForEachBlock = data['timeForEachBlock']
+// subsidy = data['subsidy']
+// subsidyHalvingInterval = data['subsidyHalvingInterval']
+// pub_key = data['pub_key']
+// minimum_fee = data['minimum_fee']
+// maximum_time = data['maximum_time']
 
 export default function Index() {
     return (
         <Header
-            content={<div>Start</div>}
+            content={
+                <div>
+                </div>
+            }
         />
     );
 }

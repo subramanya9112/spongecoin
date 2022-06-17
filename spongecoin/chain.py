@@ -1,12 +1,11 @@
-from itertools import chain
-from transaction import Transaction
-import time
 import json
+import random
+import time
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
-import random
 from threading import Timer, Thread
+from transaction import Transaction
 
 
 class Chain:
@@ -79,13 +78,17 @@ class Chain:
 
     def _mine(self) -> None:
         # if the no_of_block % adjust_after_block == 0, set the difficulty target to the next difficulty target
-        # TODO: check this once
         if len(self.chain) != 0 and len(self.chain) % self.adjustAfterBlocks == 0:
-            self.difficultyTarget *= (
-                (self.chain[-1]['timestamp']-self.chain[-self.adjustAfterBlocks]['timestamp']) /
-                (self.adjustAfterBlocks*self.timeForEachBlock)
-            )
-            print("New difficulty target: " + str(self.difficultyTarget))
+            if len(self.chain) == self.adjustAfterBlocks:
+                self.difficultyTarget *= (
+                    (self.chain[-1]['timestamp'] - self.chain[-self.adjustAfterBlocks]['timestamp']) /
+                    (self.adjustAfterBlocks * self.timeForEachBlock)
+                )
+            else:
+                self.difficultyTarget *= (
+                    (self.chain[-1]['timestamp'] - self.chain[-self.adjustAfterBlocks - 1]['timestamp']) /
+                    (self.adjustAfterBlocks * self.timeForEachBlock)
+                )
 
         self.pending_transactions.insert(0, Transaction.GetCoinBaseTransaction(
             subsidy=self.calculateSubsidy(),
@@ -183,7 +186,7 @@ class Chain:
         block['previousBlockHash'] = SHA256.new(str(json.dumps(self.chain[-1])).encode('utf-8')).hexdigest() if len(self.chain) > 1 else "0"
         block['timestamp'] = time.time()
         block['difficultyTarget'] = self.difficultyTarget
-        block['height'] = len(chain) + 1
+        block['height'] = len(self.chain) + 1
         block['num_transaction'] = len(self.pending_transactions)
         block['transactions'] = self.pending_transactions
         return block

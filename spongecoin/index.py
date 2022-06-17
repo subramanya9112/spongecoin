@@ -1,5 +1,6 @@
 from Crypto.PublicKey import RSA
 from flask import Flask, request
+from flask_cors import CORS
 from flask_socketio import SocketIO, send
 from chain import Chain
 from client_ws import ClientWS
@@ -7,10 +8,11 @@ import variables
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
+CORS(app, resources={r"*": {"origins": "*"}})
 socketio = SocketIO(app)
 
-client = ClientWS()
-chain = None
+client = None
+chain = Chain()
 
 
 @app.route('/status', methods=['GET'])
@@ -25,16 +27,31 @@ def start():
             return {"status": variables.STARTED}
 
         data = request.get_json()
-        
-        client.connect(variables.REFLECTOR_URL)
-        
+
+        # client.connect(variables.REFLECTOR_URL)
+
+        totalCoins = data['totalCoins']
+        difficultyTarget = data['difficultyTarget']
+        adjustAfterBlocks = data['adjustAfterBlocks']
+        timeForEachBlock = data['timeForEachBlock']
+        subsidy = data['subsidy']
+        subsidyHalvingInterval = data['subsidyHalvingInterval']
         pub_key = data['pub_key']
-        chain = data['chain']
-        should_verify = data['should_verify']
-        url = data['url']
-        transaction_technique = data['transaction_technique']
         minimum_fee = data['minimum_fee']
         maximum_time = data['maximum_time']
+
+        chain.startSpongeChain(
+            totalCoins=totalCoins,
+            difficultyTarget=difficultyTarget,
+            adjustAfterBlocks=adjustAfterBlocks,
+            timeForEachBlock=timeForEachBlock,
+            subsidy=subsidy,
+            subsidyHalvingInterval=subsidyHalvingInterval,
+            pub_key=pub_key,
+            minimum_fee=minimum_fee,
+            maximum_time=maximum_time,
+            client=client,
+        )
 
         variables.STARTED = True
         return {"status": variables.STARTED}
@@ -77,7 +94,7 @@ def create_sidechain():
     return {"chains": "chains"}
 
 
-@app.route('/mined_coins', method=['POST'])
+@app.route('/mined_coins', methods=['POST'])
 def mined_coins():
     return {"chains": "chains"}
 
