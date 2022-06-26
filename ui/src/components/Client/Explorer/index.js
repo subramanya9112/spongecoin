@@ -1,7 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import './index.scss';
 import Header from './../Header';
-import bitcoini from './assets/bitcoin.svg';
+import bitcoini from './../../../images/bitcoin.svg';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
