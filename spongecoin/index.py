@@ -1,9 +1,8 @@
-from Crypto.PublicKey import RSA
 from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, send
 from chain import Chain
-from client_ws import ClientWS
+
 import variables
 
 app = Flask(__name__)
@@ -11,7 +10,6 @@ app.config['SECRET_KEY'] = 'secret'
 CORS(app, resources={r"*": {"origins": "*"}})
 socketio = SocketIO(app)
 
-client = None
 chain = Chain()
 
 
@@ -30,6 +28,8 @@ def start():
 
         # client.connect(variables.REFLECTOR_URL)
 
+        name = data['name']
+        reflectorURL = data['reflectorURL']
         totalCoins = data['totalCoins']
         difficultyTarget = data['difficultyTarget']
         adjustAfterBlocks = data['adjustAfterBlocks']
@@ -41,6 +41,7 @@ def start():
         maximum_time = data['maximum_time']
 
         chain.startSpongeChain(
+            name=name,
             totalCoins=totalCoins,
             difficultyTarget=difficultyTarget,
             adjustAfterBlocks=adjustAfterBlocks,
@@ -50,7 +51,6 @@ def start():
             pub_key=pub_key,
             minimum_fee=minimum_fee,
             maximum_time=maximum_time,
-            client=client,
         )
 
         variables.STARTED = True

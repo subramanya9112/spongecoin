@@ -5,7 +5,7 @@ class Chains {
         this.urls = [];
     }
 
-    add(chainName, socketId, url) {
+    addClientToChain(chainName, socketId, url) {
         if (!this.chains[chainName]) {
             this.chains[chainName] = [];
         }
@@ -16,11 +16,11 @@ class Chains {
         this.urls.push(url);
     }
 
-    get_chain_name() {
+    getAllChainName() {
         return Object.keys(this.chains);
     }
 
-    get_chain(chainName) {
+    getChainDetails(chainName) {
         let urls = [];
         if (this.chains[chainName]) {
             for (var i = 0; i < this.chains[chainName].length; i++) {
@@ -30,25 +30,23 @@ class Chains {
         return this.urls;
     }
 
-    get_url() {
+    getURL() {
         let url = this.urls.shift();
         this.urls.push(url);
         return url;
     }
 
-    remove(socketId, chainsName) {
-        for (var chainName in chainsName) {
-            if (this.chains[chainName]) {
-                for (var i = this.chains[chainName].length; i--;) {
-                    if (this.chains[chainName][i].socketId === socketId) {
-                        this.chains[chainName].splice(i, 1);
-                        for (var j = this.urls; j--;) {
-                            if (this.urls[j] === this.chains[chainName][i].url) {
-                                this.urls.splice(j, 1);
-                            }
+    removeClientFromChain(socketId, chainName) {
+        if (this.chains[chainName]) {
+            for (var i = this.chains[chainName].length; i--;) {
+                if (this.chains[chainName][i].socketId === socketId) {
+                    this.chains[chainName].splice(i, 1);
+                    for (var j = this.urls; j--;) {
+                        if (this.urls[j] === this.chains[chainName][i].url) {
+                            this.urls.splice(j, 1);
                         }
-                        break;
                     }
+                    break;
                 }
             }
         }
