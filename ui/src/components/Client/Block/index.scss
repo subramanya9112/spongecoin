@@ -1,0 +1,176 @@
+.blockLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: 28px;
+}
+
+.block {
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    padding: 20px;
+    overflow-x: auto;
+
+    .blockHeader {
+        padding: 20px 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .blockData {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 0;
+
+        .blockKey {
+            flex: 1;
+            font-weight: bold;
+            font-size: 20px;
+            padding-right: 50px;
+        }
+
+        .blockValue {
+            flex: 4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .blockLineBreak {
+        margin: 10px 0px;
+        background-color: #000000;
+        opacity: 0.4;
+        height: 1px;
+        width: 100%;
+    }
+
+    .blockTransaction {
+        width: calc(100% - 20px);
+        padding: 10px;
+        cursor: pointer;
+
+        .blockTransactionHeader {
+            padding: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .blockCoinBase {
+            display: flex;
+            width: 100%;
+            padding: 10px 0;
+
+            .blockCoinBaseKey {
+                flex: 1;
+                font-weight: bold;
+                font-size: 20px;
+                padding-right: 50px;
+            }
+
+            .blockCoinBaseValue {
+                flex: 4;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .blockTranx {
+            display: flex;
+            width: 100%;
+            padding: 10px 0;
+            align-items: center;
+
+            .blockTranxHeader {
+                flex: 1;
+                font-weight: bold;
+                font-size: 20px;
+                padding-right: 50px;
+                text-align: center;
+                vertical-align: middle;
+            }
+
+            .blockTranxIn {
+                flex: 1;
+
+                .blockTranxInData {
+                    .blockTranxInDataHeader {
+                        display: flex;
+                        align-items: center;
+                        padding: 10px 0px;
+                    }
+
+                    .blockTranxInKey {
+                        width: 200px;
+                        font-weight: bold;
+                        font-size: 20px;
+                    }
+
+                    .blockTranxInValue {
+                        flex: 1;
+                    }
+                }
+            }
+
+            .blockTranxOut {
+                flex: 1;
+
+                .blockTranxOutData {
+                    .blockTranxOutDataHeader {
+                        display: flex;
+                        align-items: center;
+                        padding: 10px 0px;
+                    }
+
+                    .blockTranxOutKey {
+                        width: 200px;
+                        font-weight: bold;
+                        font-size: 20px;
+                    }
+
+                    .blockTranxOutValue {
+                        flex: 1;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+        }
+
+        &:hover {
+            border-radius: 5px;
+            background-color: #00000011;
+        }
+    }
+}
+
+.blockTranxLineBreak {
+    margin: 10px 0px;
+    background-color: #000000;
+    opacity: 0.4;
+    height: 1px;
+    width: 100%;
+}
+
+.block::-webkit-scrollbar {
+    width: 8px;
+}
+
+.block::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px #000000;
+    border-radius: 10px;
+}
+
+.block::-webkit-scrollbar-thumb {
+    background: #414141;
+    border-radius: 10px;
+}
+
+.block::-webkit-scrollbar-thumb:hover {
+    background: #414141;
+}

@@ -3,15 +3,18 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const PORT = 8000;
+const cors = require('cors')
 const Chains = require('./chains.js');
 const chain = new Chains();
 
 app.use(express.json())
+app.use(cors())
 
 io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('disconnect', () => {
+        chain.removeClient(socket.id);
         console.log('user disconnected');
     });
 
@@ -56,7 +59,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('onBlock', () => {
+    socket.on('onBlock', (data) => {
         const { roomId, block } = data;
         if (roomId && block) {
             socket.broadcast.to(roomId).emit('onBlock', {

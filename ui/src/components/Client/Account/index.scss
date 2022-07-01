@@ -1,0 +1,144 @@
+.accountSidebar {
+    margin: 0;
+    width: 20%;
+    height: 100%;
+    background-color: #000000;
+    overflow-x: auto;
+
+    .accountError {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        font-size: 20px;
+        text-overflow: ellipsis;
+    }
+
+    .accountItems {
+        width: calc(100% - 24px);
+        padding: 10px;
+        border-radius: 4px;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        font-size: 20px;
+        text-overflow: ellipsis;
+        cursor: pointer;
+    }
+
+    .accountItems:hover {
+        background-color: #414141;
+    }
+
+    .accountItemsActive {
+        background-color: #414141;
+    }
+}
+
+.accountSidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.accountSidebar::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px #000000;
+    border-radius: 10px;
+}
+
+.accountSidebar::-webkit-scrollbar-thumb {
+    background: #414141;
+    border-radius: 10px;
+}
+
+.accountSidebar::-webkit-scrollbar-thumb:hover {
+    background: #414141;
+}
+
+.accountChainError {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.accountPageContent {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+
+    .accountHeader {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px 0;
+        font-size: 24px;
+        font-weight: bold;
+        align-items: center;
+
+        .accountHeaderRight {
+            display: flex;
+            align-items: center;
+
+            button {
+                margin-left: 20px;
+                font-size: 24px;
+                font-weight: bold;
+                color: white;
+                background-color: #414141;
+                border: none;
+                border-radius: 4px;
+                padding: 10px;
+                cursor: pointer;
+            }
+        }
+    }
+
+    .accountLineBreak {
+        margin: 10px 0px;
+        background-color: #000000;
+        opacity: 0.4;
+        height: 1px;
+        width: 100%;
+    }
+
+    .accountTransaction {
+        display: flex;
+
+        .accountTransactionSubsidy {
+            width: 100px;
+        }
+
+        .accountTransactionTimeStamp {
+            width: 250px;
+        }
+
+        .accountTransactionImage {
+            width: 50px;
+        }
+
+        .accountTransactionTransactionId {
+            flex: 1;
+        }
+    }
+}
+
+.accountPageContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+.accountPageContent::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px #000000;
+    border-radius: 10px;
+}
+
+.accountPageContent::-webkit-scrollbar-thumb {
+    background: #414141;
+    border-radius: 10px;
+}
+
+.accountPageContent::-webkit-scrollbar-thumb:hover {
+    background: #414141;
+}

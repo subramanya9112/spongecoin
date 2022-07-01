@@ -1,326 +1,245 @@
-import React, { Fragment } from 'react';
-import './index.scss';
+import React, { useState, Fragment, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import Header from './../Header';
-import bitcoini from './../../../images/bitcoin.svg';
+import './index.scss';
 
 export default function Index() {
-    const items = [{
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }, {
-        icon: bitcoini,
-        text: "index"
-    }]
+    let { transaction_id, chain_name } = useParams();
+
+    const [reflectorURL, setReflectorURL] = useState('');
+    const [minerURL, setMinerURL] = useState('');
+    const [transaction, setTransaction] = useState(null);
+
+    // Get Reflector URL
+    useEffect(() => {
+        const getReflectorURL = async () => {
+            let res = await axios.post('http://localhost:3000/get_reflector_url');
+            if (res.status !== 200 || res.data.status === false) {
+                return;
+            }
+            setReflectorURL(res.data.reflector_url);
+        }
+        getReflectorURL().catch(console.error);
+    }, [setReflectorURL]);
+
+    // Get Miner URL
+    useEffect(() => {
+        const getMinerURL = async () => {
+            let res = await axios.post(reflectorURL + "/chain", {
+                "chainName": chain_name
+            });
+            if (res.status !== 200) {
+                return;
+            }
+            if (res.data.length !== 0) {
+                setMinerURL(res.data[0]);
+            }
+        };
+        if (chain_name !== undefined && reflectorURL !== '') {
+            getMinerURL().catch(console.error);
+        }
+    }, [chain_name, reflectorURL]);
+
+    // Get Block Details
+    useEffect(() => {
+        let getTransactionDetails = async () => {
+            let res = await axios.post(minerURL + "/transaction", {
+                "transaction_id": transaction_id
+            });
+            if (res.status !== 200 || res.data.status === false) {
+                return;
+            }
+            setTransaction(res.data.transaction);
+        }
+        if (minerURL && minerURL !== '') {
+            getTransactionDetails().catch(console.error);
+        }
+    }, [minerURL]);
+
+    let getPublicKeyDiv = (pub_key) => {
+        return pub_key.split('\n').map((val, index) => {
+            return <div key={index}>{val}</div>
+        })
+    };
+
+    let getTransacation = (transaction) => {
+        if (transaction['type'] === "CoinBaseTransaction") {
+            return (
+                <Fragment>
+                    <div className='transactionHeader'>Coin Base Transaction</div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Transaction ID</div>
+                        <div className='transactionValue'>{transaction['transactionId']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Subsidy</div>
+                        <div className='transactionValue'>{transaction['subsidy']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Public Key</div>
+                        <div className='transactionValue'>
+                            {getPublicKeyDiv(transaction['pub_key'])}
+                        </div>
+                    </div>
+                </Fragment>
+            );
+        } else if (transaction['type'] === "GenesisBlock") {
+            return (
+                <Fragment>
+                    <div className='transactionHeader'>Genesis Block Transaction</div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Transaction ID</div>
+                        <div className='transactionValue'>{transaction['transactionId']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Name</div>
+                        <div className='transactionValue'>{transaction['name']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Total Coins</div>
+                        <div className='transactionValue'>{transaction['totalCoins']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Adjust After Blocks</div>
+                        <div className='transactionValue'>{transaction['adjustAfterBlocks']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Time for each Block</div>
+                        <div className='transactionValue'>{transaction['timeForEachBlock']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Difficulty Target</div>
+                        <div className='transactionValue'>{transaction['difficultyTarget']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Subsidy</div>
+                        <div className='transactionValue'>{transaction['subsidy']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Subsidy Halving Interval</div>
+                        <div className='transactionValue'>{transaction['subsidyHalvingInterval']}</div>
+                    </div>
+                </Fragment>
+            );
+        } else if (transaction['type'] == "Transaction") {
+            return (
+                <Fragment>
+                    <div className='transactionHeader'>Transaction</div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Transaction ID</div>
+                        <div className='transactionCoinBaseValue'>{transaction['transactionId']}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Public Key</div>
+                        <div className='transactionCoinBaseValue'>
+                            {getPublicKeyDiv(transaction['pub_key'])}
+                        </div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Signature</div>
+                        <div className='transactionCoinBaseValue'>{transaction['signature']}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Time Stamp</div>
+                        <div className='transactionCoinBaseValue'>{(new Date(transaction['timestamp'])).toLocaleString()}</div>
+                    </div>
+                    <div className='transactionTranx'>
+                        <div className='transactionTranxHeader'>In Transaction</div>
+                        <div className='transactionTranxHeader'>Out Transaction</div>
+                    </div>
+                    <div className='transactionTranx'>
+                        <div className='transactionTranxIn'>
+                            {transaction['in'].map((tranx, index) => {
+                                return (
+                                    <Fragment key={index}>
+                                        <div className='transactionTranxInData'>
+                                            <div className='transactionTranxInDataHeader'>
+                                                <div className='transactionTranxInKey'>Transaction ID</div>
+                                                <div className='transactionTranxInValue'>{tranx['inId']}</div>
+                                            </div>
+                                            <div className='transactionTranxInDataHeader'>
+                                                <div className='transactionTranxInKey'>Amount</div>
+                                                <div className='transactionTranxInValue'>{tranx['amount']}</div>
+                                            </div>
+                                        </div>
+                                        <div className='transactionTranxLineBreak' />
+                                    </Fragment>
+                                );
+                            })}
+                        </div>
+                        <div className='transactionTranxOut'>
+                            {transaction['out'].map((tranx, index) => {
+                                if (tranx['type'] == "transfer")
+                                    return (
+                                        <Fragment key={index}>
+                                            <div className='transactionTranxOutData' >
+                                                <div className='transactionTranxOutDataHeader'>
+                                                    <div className='transactionTranxOutKey'>Transaction Type</div>
+                                                    <div className='transactionTranxOutValue'>Transfer</div>
+                                                </div>
+                                                <div className='transactionTranxOutDataHeader'>
+                                                    <div className='transactionTranxOutKey'>Transaction ID</div>
+                                                    <div className='transactionTranxOutValue'>{tranx['outId']}</div>
+                                                </div>
+                                                <div className='transactionTranxOutDataHeader'>
+                                                    <div className='transactionTranxOutKey'>Amount</div>
+                                                    <div className='transactionTranxOutValue'>{tranx['amount']}</div>
+                                                </div>
+                                                <div className='transactionTranxOutDataHeader'>
+                                                    <div className='transactionTranxOutKey'>Public Key</div>
+                                                    <div className='transactionTranxOutValue'>{getPublicKeyDiv(tranx['receiver_pub_key'])}</div>
+                                                </div>
+                                            </div>
+                                            <div className='transactionTranxLineBreak' />
+                                        </Fragment>
+                                    );
+                                else
+                                    return (
+                                        <Fragment key={index}>
+                                            <div className='transactionTranxOutData' >
+                                                <div className='transactionTranxOutDataHeader'>
+                                                    <div className='transactionTranxOutKey'>Transaction Type</div>
+                                                    <div className='transactionTranxOutValue'>Reward</div>
+                                                </div>
+                                                <div className='transactionTranxOutDataHeader'>
+                                                    <div className='transactionTranxOutKey'>Transaction Id</div>
+                                                    <div className='transactionTranxOutValue'>{tranx['outId']}</div>
+                                                </div>
+                                                <div className='transactionTranxOutDataHeader'>
+                                                    <div className='transactionTranxOutKey'>Amount</div>
+                                                    <div className='transactionTranxOutValue'>{tranx['amount']}</div>
+                                                </div>
+                                            </div>
+                                        </Fragment>
+                                    )
+                            })}
+                        </div>
+                    </div>
+                </Fragment>
+            )
+        } else {
+            return <div>Transaction type not found</div>
+        }
+    }
 
     return (
         <Header
             style={{ display: "flex" }}
             content={
                 <Fragment>
-                    <div className="sidebar">
-                        {items.map((item, index) => {
-                            return <div className="itemsInExplorer" key={`items_${index}`}>
-                                <img className="itemsPic" src={item.icon} alt="React Logo" />
-                                <div className="itemsText">{item.text}</div>
+                    {transaction === null ?
+                        <div className='transactionLoading'>Loading...</div>
+                        :
+                        <div className="transaction">
+                            <div className="transactionHeader">
+                                Transaction {transaction_id}
                             </div>
-                        })}
-                    </div>
-
-                    <div className="transactionPageContent">
-                        <div className="balance">
-                            Balance: 123.456 BTC
+                            {getTransacation(transaction)}
                         </div>
-                        <div className="transcationHeading">
-                            Transactions
-                        </div>
-                        <div className="transcationList">
-                            <div className="feeDivision">
-                                <div className="fee">
-                                    Fee
-                                </div>
-                                <div className="feeComponents">
-                                    <div className="transactionFee">
-                                        0.00003024 BTC
-                                    </div>
-                                    <div className="satsat">
-                                        (13.440 sat/B - 5.277 sat/WU - 225 bytes)
-                                    </div>
-                                    <div className="virtualBytes">
-                                        (21.000 sat/vByte - 144 virtual bytes)
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="hashDivision">
-                                <div className="hash">
-                                    hash
-                                </div>
-                                <div className="hashComponents">
-                                    <div className="hashValue">
-                                        750750252a37e83d413671413d217f051fe3cba50553d6d6238eda936f944d61
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6cs
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div className="transcationList">
-                            <div className="feeDivision">
-                                <div className="fee">
-                                    Fee
-                                </div>
-                                <div className="feeComponents">
-                                    <div className="transactionFee">
-                                        0.00003024 BTC
-                                    </div>
-                                    <div className="satsat">
-                                        (13.440 sat/B - 5.277 sat/WU - 225 bytes)
-                                    </div>
-                                    <div className="virtualBytes">
-                                        (21.000 sat/vByte - 144 virtual bytes)
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="hashDivision">
-                                <div className="hash">
-                                    hash
-                                </div>
-                                <div className="hashComponents">
-                                    <div className="hashValue">
-                                        750750252a37e83d413671413d217f051fe3cba50553d6d6238eda936f944d61
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div className="transcationList">
-                            <div className="feeDivision">
-                                <div className="fee">
-                                    Fee
-                                </div>
-                                <div className="feeComponents">
-                                    <div className="transactionFee">
-                                        0.00003024 BTC
-                                    </div>
-                                    <div className="satsat">
-                                        (13.440 sat/B - 5.277 sat/WU - 225 bytes)
-                                    </div>
-                                    <div className="virtualBytes">
-                                        (21.000 sat/vByte - 144 virtual bytes)
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="hashDivision">
-                                <div className="hash">
-                                    hash
-                                </div>
-                                <div className="hashComponents">
-                                    <div className="hashValue">
-                                        750750252a37e83d413671413d217f051fe3cba50553d6d6238eda936f944d61
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="inout">
-                                        <div className="in">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                        <div className="out">
-                                            <div className="id">
-                                                bc1qjw6ey0ed9l02sav3p69vqh98ml6csvh0c2v65c
-                                            </div>
-                                            <div className="amount">
-                                                0.03406413 BTC
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </Fragment>
             }
         />
-
     )
 }

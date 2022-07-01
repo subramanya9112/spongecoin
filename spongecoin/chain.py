@@ -5,6 +5,9 @@ from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from threading import Timer, Thread
+
+from requests import request
+import requests
 from transaction import Transaction
 from client_ws import ClientWS
 
@@ -46,13 +49,13 @@ class Chain:
         print("Disconnected")
 
     def onEvent(self, event, data) -> None:
-        if data.roomId == self.name:
+        if data["roomId"] == self.name:
             if event == "minersCount":
                 pass
             elif event == "onTransaction":
-                self.onTransaction(data.transaction)
+                self.onTransaction(data["transaction"])
             elif event == "onBlock":
-                self.onBlock(data.block)
+                self.onBlock(data['block'])
 
     def startSpongeChain(
             self,
@@ -101,17 +104,79 @@ class Chain:
         # Start the timer for mining
         self.startTimer()
 
-    def start(self) -> None:
-        # TODO: get the data from clients
+    def start(
+        self,
+        name,
+        pub_key,
+        minimum_fee,
+        maximum_time,
+        url,
+        reflector_url,
+    ) -> None:
+        # Get the url from reflector
+        res = requests.post(reflector_url + "/chain", json={
+            "chainName": name,
+        })
+        if res.status_code != 200:
+            print("Error: " + res.text)
+            return
+        urls = res.json()
 
-        # TODO: set here
+        # Set basic info
+        self.name = name
+        self.pub_key = pub_key
+        self.minimum_fee = minimum_fee
+        self.maximum_time = maximum_time
+        self.url = url
+        self.reflector_url = reflector_url
 
-        # TODO: start the timer
-        pass
+        # Get the data from clients
+        for url in urls:
+            res = requests.post(url + "/aboutChain")
+            if res.status_code != 200:
+                print("Error: " + res.text)
+                continue
+
+            data = res.json()
+            if data["status"] == False:
+                print("Error: " + data["status"])
+                continue
+
+            self.difficultyTarget = data['difficultyTarget']
+            self.adjustAfterBlocks = data['adjustAfterBlocks']
+            self.timeForEachBlock = data['timeForEachBlock']
+            self.subsidy = data['subsidy']
+            self.subsidyHalvingInterval = data['subsidyHalvingInterval']
+
+            # Get the chain
+            res = requests.post(url + "/chain")
+            if res.status_code != 200:
+                print("Error: " + res.text)
+                continue
+
+            data = res.json()
+            if data["status"] == False:
+                print("Error: " + data["status"])
+                continue
+
+            self.chain = data['chain']
+            break
+        else:
+            return
+
+        # Listen on the reflector
+        self.client.connect(reflector_url)
+        self.client.emit("addToRoom", {
+            "roomId": self.name,
+            "url": url,
+        })
+
+        # Start the timer for mining
+        self.startTimer()
 
     def calculateSubsidy(self) -> int:
-        halvings = len(self.chain) / self.subsidyHalvingInterval
-        return self.subsidy // (2 ** halvings)
+        halvings = int(len(self.chain) / self.subsidyHalvingInterval)
+        return self.subsidy / (2 ** halvings)
 
     def startTimer(self) -> None:
         self._timer = Timer(self.maximum_time, self.mine)
@@ -148,9 +213,10 @@ class Chain:
         while True:
             if self.stop:
                 return
-            block['nonce'] = random.getrandbits(128)
+            block['nonce'] = str(random.getrandbits(128))
             hash = int(SHA256.new(str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
             if hash < self.difficultyTarget:
+                block['hash'] = str(hash)
                 break
 
         if self.stop:
@@ -168,15 +234,15 @@ class Chain:
         if self._timer != None:
             self._timer.cancel()
 
+        self.stop = False
         t = Thread(target=self._mine)
         t.start()
 
     def getUTXOsInTransaction(self, transactions, transaction, pub_key, add_reward) -> None:
         if transaction['type'] == "Transaction":
-            if transaction['sender_pub_key'] == pub_key:
+            if transaction['pub_key'] == pub_key:
                 for inTransaction in transaction['in']:
-                    if inTransaction['inId']:
-                        del transactions['inId']
+                    del transactions[inTransaction['inId']]
             for outTransaction in transaction['out']:
                 if outTransaction['type'] == "transfer":
                     if outTransaction['receiver_pub_key'] == pub_key:
@@ -193,17 +259,18 @@ class Chain:
             if coinbase['pub_key'] == pub_key:
                 transactions[coinbase['transactionId']] = coinbase['subsidy']
             for transaction in block['transactions'][1:]:
-                self.getUTXOsInTransaction(transactions, transaction, coinbase['pub_key'] == pub_key)
+                self.getUTXOsInTransaction(transactions, transaction, pub_key, coinbase['pub_key'] == pub_key)
         return transactions
 
-    def onTransaction(self, transaction) -> bool:
+    def onTransaction(self, transaction, add=True) -> bool:
         # Verify the transaction signature
         pub_key = RSA.import_key(transaction['pub_key'])
         signature = transaction['signature']
         del transaction['signature']
         hash_verify = PKCS1_v1_5.new(pub_key)
         try:
-            hash_verify.verify(SHA256.new(data=json.dumps(transaction)), signature=signature)
+            data = json.dumps(transaction, separators=(',', ':'))
+            hash_verify.verify(SHA256.new(data=bytes(data, encoding="utf-8")), signature=signature)
         except Exception as e:
             print(e)
             return False
@@ -215,13 +282,24 @@ class Chain:
         for pendingTransaction in self.pending_transactions:
             self.getUTXOsInTransaction(transactions, pendingTransaction, transaction['pub_key'], False)
 
+        inAmt = 0
         for tranx in transaction['in']:
             if tranx['inId'] not in transactions:
                 return False
             if tranx['amount'] != transactions[tranx['inId']]:
                 return False
+            inAmt += float(tranx['amount'])
 
-        # TODO: Check if out's equal to the total amount
+        outAmt = 0
+        for tranx in transaction['out']:
+            outAmt += float(tranx['amount'])
+
+        # Check if out's equal to the total amount
+        if inAmt != outAmt:
+            return False
+
+        if not add:
+            return True
 
         # Send transaction to all
         self.client.emit("onTransaction", {
@@ -236,8 +314,9 @@ class Chain:
         if transaction['type'] == "Transaction":
             for outTransaction in transaction['out']:
                 if outTransaction['type'] == "reward":
-                    self.pending_transactions_fee += outTransaction['amount']
+                    self.pending_transactions_fee += float(outTransaction['amount'])
         if self.pending_transactions_fee > self.minimum_fee:
+            self.stop = True
             Timer(0, self.mine).start()
 
         return True
@@ -252,27 +331,47 @@ class Chain:
         self.stop = True
         self._timer.cancel()
 
+        # Check the height and clear all
+        if len(self.chain) != 0 and len(self.chain) >= block['height']:
+            if self.chain[block['height'] - 1]['timestamp'] >= block['timestamp']:
+                self.chain = self.chain[:block['height'] - 1]
+            else:
+                return
+
         # Verify the block hash
-        self.adjustDifficultyTarget()
+        oldHash = block['hash']
+        del block['hash']
         hash = int(SHA256.new(str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
-        if hash > self.difficultyTarget:
+        self.adjustDifficultyTarget()
+        if hash > self.difficultyTarget or str(hash) != oldHash:
+            return
+        block['hash'] = oldHash
+
+        # Verify the previous block hash
+        if len(self.chain) != 0 and block['previousBlockHash'] != self.chain[-1]['hash']:
             return
 
         # Check only one coinbase transaction
         coinbase_transaction = block['transactions'][0]
         if coinbase_transaction['type'] != "CoinBaseTransaction":
             return
-        if coinbase_transaction['subsidy'] != self.calculateSubsidy():
+        if float(coinbase_transaction['subsidy']) != self.calculateSubsidy():
             return
 
-        for transaction in block['transactions']:
+        for transaction in block['transactions'][1:]:
             if transaction['type'] == "Transaction":
-                # Check if the transaction is valid
-                pass
-            else:
+                type = transaction['type']
+                transactionId = transaction['transactionId']
+                del transaction['type']
+                del transaction['transactionId']
+                valid = self.onTransaction(transaction, False)
+                if not valid:
+                    return
+                transaction['type'] = type
+                transaction['transactionId'] = transactionId
+            elif transaction['type'] == "CoinBaseTransaction":
                 return
 
-        # TODO: verify the block signature
         self.chain.append(block)
 
         # start new block
@@ -280,13 +379,77 @@ class Chain:
         Timer(2, self._stop).start()
         return True
 
+    def getTransaction(self, transactionId):
+        for block in self.chain:
+            for transaction in block['transactions']:
+                if transaction['transactionId'] == transactionId:
+                    return transaction
+                if transaction['type'] == "Transaction":
+                    for outTransaction in transaction['out']:
+                        if outTransaction['outId'] == transactionId:
+                            return transaction
+        return None
+
     def create_block(self):
         block = {}
         block['version'] = 1
-        block['previousBlockHash'] = SHA256.new(str(json.dumps(self.chain[-1])).encode('utf-8')).hexdigest() if len(self.chain) > 1 else "0"
-        block['timestamp'] = time.time()
-        block['difficultyTarget'] = self.difficultyTarget
+        block['previousBlockHash'] = self.chain[-1]['hash'] if len(self.chain) != 0 else "0"
+        block['timestamp'] = (time.time() * 1000) + random.random()
+        block['difficultyTarget'] = str(int(self.difficultyTarget))
         block['height'] = len(self.chain) + 1
         block['num_transaction'] = len(self.pending_transactions)
         block['transactions'] = self.pending_transactions
         return block
+
+    def getClientTransactions(self, accountId):
+        transactions = []
+        amount = 0
+        for block in self.chain:
+            coinBasePubKey = None
+            if block['transactions'][0]['type'] == "CoinBaseTransaction":
+                coinBasePubKey = block['transactions'][0]['pub_key']
+                if coinBasePubKey == accountId:
+                    amount += float(block['transactions'][0]['subsidy'])
+                    transactions.append(block['transactions'][0])
+                else:
+                    coinBasePubKey = None
+
+            for transaction in block['transactions'][1:]:
+                if transaction['type'] == "Transaction":
+                    for ins in transaction['in']:
+                        if transaction['pub_key'] == accountId:
+                            amount -= float(ins['amount'])
+                    for outs in transaction['out']:
+                        if outs['type'] == "reward":
+                            if coinBasePubKey == accountId:
+                                transactions.append({
+                                    'type': 'Transaction',
+                                    'transactionId': outs['outId'],
+                                    'timestamp': transaction['timestamp'],
+                                    'amount': outs['amount'],
+                                    'types': "in",
+                                })
+                                amount += float(outs['amount'])
+                            if transaction['pub_key'] == accountId:
+                                transactions.append({
+                                    'type': 'Transaction',
+                                    'transactionId': outs['outId'],
+                                    'timestamp': transaction['timestamp'],
+                                    'amount': outs['amount'],
+                                    'types': "out",
+                                })
+                        else:
+                            if outs['receiver_pub_key'] == accountId:
+                                amount += float(outs['amount'])
+                            elif transaction['pub_key'] == accountId:
+                                transactions.append({
+                                    'type': 'Transaction',
+                                    'transactionId': outs['outId'],
+                                    'timestamp': transaction['timestamp'],
+                                    'amount': outs['amount'],
+                                    'types': "out",
+                                })
+                elif transaction['type'] == "SideChainCreateTransaction":
+                    # TODO: fill this
+                    pass
+        return transactions[::-1], amount
