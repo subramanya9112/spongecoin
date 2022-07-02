@@ -20,20 +20,18 @@ export default function Index() {
                         <div className="mainPageCard">
                             <div className="mainPageCardRow">
                                 <div className="mainPageCards">
-                                    <div className="mainPageCardHeading">CREATE SIDE CHAIN</div>
-                                    <div className="mainPageCardContent">Create your own SIDE CHAIN in your name</div>
+                                    <div className="mainPageCardHeading">CREATE SIDECHAIN</div>
+                                    <div className="mainPageCardContent">Create your own SIDECHAIN in your name</div>
                                 </div>
                                 <div className="mainPageCards">
                                     <div className="mainPageCardHeading">EASY TO INSTALL</div>
-                                    <div className="mainPageCardContent">Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-                                        molestiae quas vel sint repudiandae consequuntur voluptatum laborum</div>
+                                    <div className="mainPageCardContent">Using docker, blockchain up in few minutes</div>
                                 </div>
                             </div>
                             <div className="mainPageCardRow">
                                 <div className="mainPageCards">
                                     <div className="mainPageCardHeading">LOW TRANSACTION TIME</div>
-                                    <div className="mainPageCardContent">Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-                                        molestiae quas vel sint repudiandae consequuntur voluptatum laborum</div>
+                                    <div className="mainPageCardContent">Create your chain with your transaction time</div>
                                 </div>
                             </div>
                         </div>

@@ -1,33 +1,17 @@
 version: "3.9"
 
 services:
-  spongechain:
-    command: [ "echo", "built image" ]
+  spongecoin:
     build:
       context: .
-      dockerfile: spongechain/Dockerfile
-    volumes:
-      - blockchain:/data/spongechain
-    networks:
-      - frontend
+      dockerfile: spongecoin/Dockerfile
   ui:
-    command: [ "echo", "built image" ]
     build:
       context: .
       dockerfile: ui/Dockerfile
-    networks:
-      - frontend
   nginx:
-    image: nginx
+    image: nginx:1.22-alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/access.log:/etc/nginx/access.log
-      - ./nginx/error.log:/etc/nginx/error.log
     ports:
       - "80:80"
-    networks:
-      - frontend
-networks:
-  frontend: null
-volumes:
-  blockchain: null

@@ -4,9 +4,11 @@ from chain import Chain
 import sys
 
 import variables
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 CORS(app, resources={r"*": {"origins": "*"}})
 
 chain = Chain()
@@ -265,4 +267,4 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         app.run(port=int(sys.argv[1]), debug=True)
     else:
-        app.run(port=8080, debug=True)
+        app.run(host='0.0.0.0', port=80)
