@@ -59,6 +59,16 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('onSideChainTransaction', (data) => {
+        const { roomId, transaction } = data;
+        if (roomId && transaction) {
+            socket.broadcast.to(roomId).emit('onSideChainTransaction', {
+                roomId,
+                transaction,
+            });
+        }
+    });
+
     socket.on('onBlock', (data) => {
         const { roomId, block } = data;
         if (roomId && block) {
@@ -77,7 +87,7 @@ app.post('/chains', (req, res) => {
 app.post('/chain', (req, res) => {
     let { chainName } = req.body;
     if (chainName) {
-        res.json(chain.getChainDetails(chain));
+        res.json(chain.getChainDetails(chainName));
     } else {
         res.status(400).json({ error: 'chainName is required' });
     }

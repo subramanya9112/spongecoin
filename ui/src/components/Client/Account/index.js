@@ -3,8 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import './index.scss';
 import Header from './../Header';
+import Button from './../../basicComponents/Button';
 import CallReceivedIcon from '@mui/icons-material/CallReceived';
 import CallMadeIcon from '@mui/icons-material/CallMade';
+import GetURL from '../../../GetURL';
 
 export default function Index() {
     const navigate = useNavigate();
@@ -19,7 +21,7 @@ export default function Index() {
     // Get Reflector URL
     useEffect(() => {
         const getReflectorURL = async () => {
-            let res = await axios.post('http://localhost:3000/get_reflector_url');
+            let res = await axios.post(`${GetURL()}/get_reflector_url`);
             if (res.status !== 200 || res.data.status === false) {
                 return;
             }
@@ -52,7 +54,7 @@ export default function Index() {
                 return;
             }
             if (res.data.length !== 0) {
-                setMinerURL(res.data[0]);
+                setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
             }
         };
         if (chain_name !== undefined && reflectorURL !== '') {
@@ -147,8 +149,11 @@ export default function Index() {
                                     <div className="accountHeader">
                                         <div>Account</div>
                                         <div className='accountHeaderRight'>
-                                            <div>Balance: {amount}</div>
-                                            <button onClick={() => navigate(`/transact/${chain_name}`)}>Transact</button>
+                                            <div style={{ marginRight: "20px" }}>Balance: {amount}</div>
+                                            <Button
+                                                onClick={() => navigate(`/transact/${chain_name}`)}
+                                                name="Transact"
+                                            />
                                         </div>
                                     </div>
                                 </Fragment>

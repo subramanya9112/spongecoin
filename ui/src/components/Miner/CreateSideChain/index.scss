@@ -1,0 +1,101 @@
+.createSideChain {
+    height: calc(100% - 100px);
+    padding: 50px;
+    font-size: 20px;
+    overflow-x: auto;
+
+    .createSideChainHeader {
+        padding: 0 0 20px 0;
+        font-size: 24px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .createSideChainPrivateFile {
+            padding-left: 20px;
+            font-size: 18px;
+            font-weight: normal;
+            position: relative;
+
+            input {
+                left: 0;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                opacity: 0;
+            }
+        }
+    }
+
+    .createSideChainBody {
+        display: flex;
+
+        .createSideChainIn {
+            flex: 1;
+            margin-right: 10px;
+
+            .createSideChainHeaderIn {
+                width: calc(100% - 20px);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin: 10px;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            .createSideChainIn {
+                .createSideChainInData {
+                    margin: 12px;
+                    margin-left: 0px;
+                    padding: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid black;
+                    border-radius: 10px;
+
+                    .createSideChainInDataCheckbox {
+                        width: 50px;
+                    }
+
+                    .createSideChainInDataTransactionId {
+                        flex: 1;
+                        font-size: 16px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .createSideChainInDataAmount {
+                        width: 50px;
+                    }
+                }
+            }
+        }
+
+        .createSideChainInForm {
+            flex: 1;
+            margin-left: 10px;
+        }
+    }
+}
+
+.createSideChain::-webkit-scrollbar {
+    width: 8px;
+}
+
+.createSideChain::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px #000000;
+    border-radius: 10px;
+}
+
+.createSideChain::-webkit-scrollbar-thumb {
+    background: #414141;
+    border-radius: 10px;
+}
+
+.createSideChain::-webkit-scrollbar-thumb:hover {
+    background: #414141;
+}

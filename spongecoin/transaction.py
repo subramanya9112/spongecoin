@@ -38,13 +38,10 @@ class Transaction:
         }
 
     @staticmethod
-    def GetSideChainCreateTransaction():
-        return {
-            "type": "SideChainCreateTransaction",
-            # TODO: Add some data here
-            "transactionId": uuid.uuid4().hex,
-            "timestamp": (time.time() * 1000) + random.random()
-        }
+    def GetSideChainCreateTransaction(transaction):
+        transaction["type"] = "SideChainCreateTransaction"
+        transaction["transactionId"] = uuid.uuid4().hex
+        return transaction
 
     @staticmethod
     def GetTransaction(transaction):

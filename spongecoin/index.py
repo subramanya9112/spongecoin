@@ -26,19 +26,19 @@ def startSpongeCoin():
         data = request.json
 
         name = data['name']
-        totalCoins = data['totalCoins']
+        totalCoins = int(data['totalCoins'])
         difficultyTarget = int(data['difficultyTarget'], 16)
-        adjustAfterBlocks = data['adjustAfterBlocks']
-        timeForEachBlock = data['timeForEachBlock']
-        subsidy = data['subsidy']
-        subsidyHalvingInterval = data['subsidyHalvingInterval']
+        adjustAfterBlocks = int(data['adjustAfterBlocks'])
+        timeForEachBlock = int(data['timeForEachBlock'])
+        subsidy = float(data['subsidy'])
+        subsidyHalvingInterval = float(data['subsidyHalvingInterval'])
         pub_key = data['pub_key']
-        minimum_fee = data['minimum_fee']
-        maximum_time = data['maximum_time']
+        minimum_fee = float(data['minimum_fee'])
+        maximum_time = int(data['maximum_time'])
         url = data['url']
         reflectorURL = data['reflectorURL']
 
-        chain.startSpongeChain(
+        chain.startChain(
             name=name,
             totalCoins=totalCoins,
             difficultyTarget=difficultyTarget,
@@ -78,7 +78,7 @@ def start():
         url = data['url']
         reflectorURL = data['reflectorURL']
 
-        chain.start(
+        status = chain.start(
             name=name,
             pub_key=pub_key,
             minimum_fee=minimum_fee,
@@ -86,9 +86,11 @@ def start():
             url=url,
             reflector_url=reflectorURL,
         )
-
-        variables.STARTED = True
-        return {"status": variables.STARTED}
+        if status:
+            variables.STARTED = True
+            return {"status": variables.STARTED}
+        else:
+            return {"status": variables.STARTED}
     except Exception as e:
         return {"status": False, "error": str(e)}
 
@@ -244,7 +246,19 @@ def onTransaction():
 
 @app.route('/create_sidechain', methods=['POST'])
 def create_sidechain():
-    return {"chains": "chains"}
+    if variables.STARTED:
+        try:
+            data = request.json
+            transaction = data['transaction']
+            added = chain.createSideChain(transaction, changeChain=True)
+            return {
+                "status": True,
+                "sidechain_added": added
+            }
+        except Exception as e:
+            print(e)
+            return {"status": False, "error": str(e)}
+    return {"status": False, "error": "Not started"}
 
 
 if __name__ == '__main__':

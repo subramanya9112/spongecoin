@@ -4,6 +4,7 @@
   height: 60px;
   overflow: hidden;
   flex-grow: 1;
+  max-height: 76px;
 
   input {
     font-size: 16px;
@@ -11,13 +12,13 @@
     width: 100%;
     height: 100%;
     background: transparent;
-    color: red;
+    color: black;
     border: none;
     outline: none;
 
     &:focus,
     &:valid {
-      color: #000003;
+      color: #3bb143;
     }
   }
 
@@ -28,8 +29,8 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
-    border-bottom: 1px solid #000004;
-    color: #000004;
+    border-bottom: 1px solid black;
+    color: black;
 
     &::after {
       content: "";
@@ -38,7 +39,7 @@
       bottom: -1px;
       height: 100%;
       width: 100%;
-      border-bottom: 2px solid #000003;
+      border-bottom: 3px solid #3bb143;
       transform: translateX(-100%);
       transition: transform 0.3s ease;
     }
@@ -49,18 +50,17 @@
     bottom: 0px;
     left: 0px;
     transition: all 0.3s ease;
-    color: #797878;
   }
 }
 
-.form input:focus + .label-name .content-name,
-.form input:valid + .label-name .content-name {
-  transform: translateX(-150%);
+.form input:focus+.label-name .content-name,
+.form input:valid+.label-name .content-name {
+  transform: translateY(-150%);
   font-size: 14px;
-  color: #000003;
+  color: #3bb143;
 }
 
-.form input:focus + .label-name::after,
-.form input:valid + .label-name::after {
+.form input:focus+.label-name::after,
+.form input:valid+.label-name::after {
   transform: translateX(0%);
 }

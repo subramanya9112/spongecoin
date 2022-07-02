@@ -27,7 +27,7 @@ class Chains {
                 urls.push(this.chains[chainName][i].url);
             }
         }
-        return this.urls;
+        return urls;
     }
 
     getURL() {

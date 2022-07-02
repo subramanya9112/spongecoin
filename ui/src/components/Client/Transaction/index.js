@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Header from './../Header';
 import './index.scss';
+import GetURL from '../../../GetURL';
 
 export default function Index() {
     let { transaction_id, chain_name } = useParams();
@@ -14,7 +15,7 @@ export default function Index() {
     // Get Reflector URL
     useEffect(() => {
         const getReflectorURL = async () => {
-            let res = await axios.post('http://localhost:3000/get_reflector_url');
+            let res = await axios.post(`${GetURL()}/get_reflector_url`);
             if (res.status !== 200 || res.data.status === false) {
                 return;
             }
@@ -33,7 +34,7 @@ export default function Index() {
                 return;
             }
             if (res.data.length !== 0) {
-                setMinerURL(res.data[0]);
+                setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
             }
         };
         if (chain_name !== undefined && reflectorURL !== '') {
@@ -213,6 +214,83 @@ export default function Index() {
                                             </div>
                                         </Fragment>
                                     )
+                            })}
+                        </div>
+                    </div>
+                </Fragment>
+            )
+        } else if (transaction['type'] == "SideChainCreateTransaction") {
+            console.log(transaction);
+            return (
+                <Fragment>
+                    <div className='transactionHeader'>SideChain Create Transaction</div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Transaction ID</div>
+                        <div className='transactionCoinBaseValue'>{transaction['transactionId']}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Public Key</div>
+                        <div className='transactionCoinBaseValue'>
+                            {getPublicKeyDiv(transaction['pub_key'])}
+                        </div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Signature</div>
+                        <div className='transactionCoinBaseValue'>{transaction['signature']}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Chain Name</div>
+                        <div className='transactionCoinBaseValue'>{transaction['chainName']}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Time Stamp</div>
+                        <div className='transactionCoinBaseValue'>{(new Date(transaction['timestamp'])).toLocaleString()}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Peg amount</div>
+                        <div className='transactionCoinBaseValue'>{transaction['amount']}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Total Coins</div>
+                        <div className='transactionCoinBaseValue'>{transaction['totalCoins']}</div>
+                    </div>
+                    <div className='transactionCoinBase'>
+                        <div className='transactionCoinBaseKey'>Chain Name</div>
+                        <div className='transactionCoinBaseValue'>{transaction['chainName']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Adjust After Blocks</div>
+                        <div className='transactionValue'>{transaction['adjustAfterBlocks']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Time for each Block</div>
+                        <div className='transactionValue'>{transaction['timeForEachBlock']}</div>
+                    </div>
+                    <div className='transactionData'>
+                        <div className='transactionKey'>Difficulty Target</div>
+                        <div className='transactionValue'>{transaction['difficultyTarget']}</div>
+                    </div>
+                    <div className='transactionTranx'>
+                        <div className='transactionTranxHeader'>In Transaction</div>
+                    </div>
+                    <div className='transactionTranx'>
+                        <div className='transactionTranxIn'>
+                            {transaction['in'].map((tranx, index) => {
+                                return (
+                                    <Fragment key={index}>
+                                        <div className='transactionTranxInData'>
+                                            <div className='transactionTranxInDataHeader'>
+                                                <div className='transactionTranxInKey'>Transaction ID</div>
+                                                <div className='transactionTranxInValue'>{tranx['inId']}</div>
+                                            </div>
+                                            <div className='transactionTranxInDataHeader'>
+                                                <div className='transactionTranxInKey'>Amount</div>
+                                                <div className='transactionTranxInValue'>{tranx['amount']}</div>
+                                            </div>
+                                        </div>
+                                        <div className='transactionTranxLineBreak' />
+                                    </Fragment>
+                                );
                             })}
                         </div>
                     </div>

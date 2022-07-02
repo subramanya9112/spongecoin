@@ -8,6 +8,7 @@ import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArro
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import './index.scss';
 import Header from './../Header';
+import GetURL from '../../../GetURL';
 
 export default function Index() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function Index() {
   // Get Reflector URL
   useEffect(() => {
     const getReflectorURL = async () => {
-      let res = await axios.post('http://localhost:3000/get_reflector_url');
+      let res = await axios.post(`${GetURL()}/get_reflector_url`);
       if (res.status !== 200 || res.data.status === false) {
         return;
       }
@@ -58,7 +59,7 @@ export default function Index() {
         return;
       }
       if (res.data.length !== 0) {
-        setMinerURL(res.data[0]);
+        setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
       }
     };
     if (chain_name !== undefined && reflectorURL !== '') {
@@ -89,7 +90,7 @@ export default function Index() {
     if (minerURL && minerURL !== '') {
       getBlockCount().catch(console.error);
     }
-  }, [minerURL, getBlockCount]);
+  }, [minerURL]);
 
   useEffect(() => {
     let val = [];
@@ -124,7 +125,7 @@ export default function Index() {
     if (page !== 0) {
       getTransactionPage().catch(console.error);
     }
-  }, [page, transactionRange, setTransaction]);
+  }, [page, transactionRange]);
 
   return (
     <Header

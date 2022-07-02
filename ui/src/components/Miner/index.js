@@ -1,15 +1,17 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import MainPage from './MainPage';
-import Start from './Start';
-import MyMinedBlocks from './MyMinedBlocks';
+import StartSpongeCoin from './StartSpongeCoin';
+import ConnectChain from './ConnectChain';
+import CreateSideChain from './CreateSideChain';
 
 export default function Index() {
     return (
         <Routes >
             <Route path={`/`} element={<MainPage />} />
-            <Route path={`/my_mined_blocks`} element={<MyMinedBlocks />} />
-            <Route path={`/start`} element={<Start />} />
+            <Route path={`/startSpongeCoin`} element={<StartSpongeCoin />} />
+            <Route path={`/connectChain`} element={<ConnectChain />} />
+            <Route path={`/createSideChain`} element={<CreateSideChain />} />
             <Route path={`/*`} element={<div>Error from client</div>} />
         </Routes>
     )

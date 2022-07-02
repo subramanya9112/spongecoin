@@ -1,0 +1,46 @@
+.connectChain {
+    height: calc(100% - 100px);
+    padding: 50px;
+    font-size: 20px;
+    overflow-x: auto;
+
+    .connectChainHeader {
+        padding: 20px 0;
+        font-size: 24px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .connectChainDiv {
+        display: flex;
+        justify-self: center;
+        align-items: center;
+        padding: 5px 0;
+
+        .connectChainKey {
+            padding: 30px 20px 0 0;
+            font-size: 22px;
+            width: 250px;
+        }
+    }
+}
+
+.connectChain::-webkit-scrollbar {
+    width: 8px;
+}
+
+.connectChain::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px #000000;
+    border-radius: 10px;
+}
+
+.connectChain::-webkit-scrollbar-thumb {
+    background: #414141;
+    border-radius: 10px;
+}
+
+.connectChain::-webkit-scrollbar-thumb:hover {
+    background: #414141;
+}

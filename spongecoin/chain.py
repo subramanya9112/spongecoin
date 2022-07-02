@@ -6,7 +6,6 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from threading import Timer, Thread
 
-from requests import request
 import requests
 from transaction import Transaction
 from client_ws import ClientWS
@@ -38,6 +37,7 @@ class Chain:
         )
         self._timer = None
         self.stop = False
+        self.waitForTransaction = None
 
     def onConnect(self) -> None:
         print("Connected to the reflector")
@@ -54,10 +54,12 @@ class Chain:
                 pass
             elif event == "onTransaction":
                 self.onTransaction(data["transaction"])
+            elif event == "onSideChainTransaction":
+                self.createSideChain(data['transaction'])
             elif event == "onBlock":
                 self.onBlock(data['block'])
 
-    def startSpongeChain(
+    def startChain(
             self,
             name,
             totalCoins,
@@ -70,9 +72,12 @@ class Chain:
             minimum_fee,
             maximum_time,
             url,
-            reflector_url
+            reflector_url,
     ) -> None:
         self.name = name
+        self.chain = []
+        self.pending_transactions = []
+        self.pending_transactions_fee = 0
         self.difficultyTarget = difficultyTarget
         self.adjustAfterBlocks = adjustAfterBlocks
         self.timeForEachBlock = timeForEachBlock
@@ -82,6 +87,7 @@ class Chain:
         self.minimum_fee = minimum_fee
         self.maximum_time = maximum_time
         self.reflector_url = reflector_url
+        self.stop = False
 
         # Create genesis block
         self.pending_transactions.append(Transaction.GetGenesisTransaction(
@@ -95,6 +101,7 @@ class Chain:
         ))
 
         # Connect to reflector
+        self.client.disconnect()
         self.client.connect(reflector_url)
         self.client.emit("addToRoom", {
             "roomId": self.name,
@@ -103,6 +110,7 @@ class Chain:
 
         # Start the timer for mining
         self.startTimer()
+        self.waitForTransaction = None
 
     def start(
         self,
@@ -112,14 +120,14 @@ class Chain:
         maximum_time,
         url,
         reflector_url,
-    ) -> None:
+    ) -> bool:
         # Get the url from reflector
         res = requests.post(reflector_url + "/chain", json={
             "chainName": name,
         })
         if res.status_code != 200:
             print("Error: " + res.text)
-            return
+            return False
         urls = res.json()
 
         # Set basic info
@@ -129,6 +137,7 @@ class Chain:
         self.maximum_time = maximum_time
         self.url = url
         self.reflector_url = reflector_url
+        self.waitForTransaction = None
 
         # Get the data from clients
         for url in urls:
@@ -162,7 +171,7 @@ class Chain:
             self.chain = data['chain']
             break
         else:
-            return
+            return False
 
         # Listen on the reflector
         self.client.connect(reflector_url)
@@ -173,6 +182,7 @@ class Chain:
 
         # Start the timer for mining
         self.startTimer()
+        return True
 
     def calculateSubsidy(self) -> int:
         halvings = int(len(self.chain) / self.subsidyHalvingInterval)
@@ -228,6 +238,7 @@ class Chain:
             "roomId": self.name,
             "block": block,
         })
+        self.checkNewChain()
         self.startTimer()
 
     def mine(self) -> None:
@@ -250,6 +261,10 @@ class Chain:
                 elif outTransaction['type'] == "reward":
                     if add_reward:
                         transactions[outTransaction['outId']] = outTransaction['amount']
+        if transaction['type'] == "SideChainCreateTransaction":
+            if transaction['pub_key'] == pub_key:
+                for inTransaction in transaction['in']:
+                    del transactions[inTransaction['inId']]
 
     def getUTXOs(self, pub_key):
         # dict of txn_id -> amount
@@ -371,8 +386,19 @@ class Chain:
                 transaction['transactionId'] = transactionId
             elif transaction['type'] == "CoinBaseTransaction":
                 return
+            elif transaction['type'] == "SideChainCreateTransaction":
+                type = transaction['type']
+                transactionId = transaction['transactionId']
+                del transaction['type']
+                del transaction['transactionId']
+                valid = self.onTransaction(transaction, False)
+                if not valid:
+                    return
+                transaction['type'] = type
+                transaction['transactionId'] = transactionId
 
         self.chain.append(block)
+        self.checkNewChain()
 
         # start new block
         self.startTimer()
@@ -388,6 +414,9 @@ class Chain:
                     for outTransaction in transaction['out']:
                         if outTransaction['outId'] == transactionId:
                             return transaction
+                if transaction['type'] == "SideChainCreateTransaction":
+                    if transaction['transactionId'] == transactionId:
+                        return transaction
         return None
 
     def create_block(self):
@@ -450,6 +479,86 @@ class Chain:
                                     'types': "out",
                                 })
                 elif transaction['type'] == "SideChainCreateTransaction":
-                    # TODO: fill this
-                    pass
+                    if transaction['pub_key'] == accountId:
+                        amount -= transaction['amount']
+                        transactions.append({
+                            'type': 'SideChainCreateTransaction',
+                            'transactionId': transaction['transactionId'],
+                            'timestamp': transaction['timestamp'],
+                            'amount': transaction['amount'],
+                        })
         return transactions[::-1], amount
+
+    def createSideChain(self, transaction, add=True, changeChain=False) -> bool:
+        # Verify the transaction signature
+        pub_key = RSA.import_key(transaction['pub_key'])
+        signature = transaction['signature']
+        del transaction['signature']
+        hash_verify = PKCS1_v1_5.new(pub_key)
+        try:
+            data = json.dumps(transaction, separators=(',', ':'))
+            hash_verify.verify(SHA256.new(data=bytes(data, encoding="utf-8")), signature=signature)
+        except Exception as e:
+            print(e)
+            return False
+
+        transaction['signature'] = signature
+
+        # Verify has balance using the chain data and also the pending_transactions
+        transactions = self.getUTXOs(transaction['pub_key'])
+        for pendingTransaction in self.pending_transactions:
+            self.getUTXOsInTransaction(transactions, pendingTransaction, transaction['pub_key'], False)
+
+        inAmt = 0
+        for tranx in transaction['in']:
+            if tranx['inId'] not in transactions:
+                return False
+            if tranx['amount'] != transactions[tranx['inId']]:
+                return False
+            inAmt += float(tranx['amount'])
+
+        # Check if out's equal to the total amount
+        if inAmt != transaction['amount']:
+            return False
+
+        if not add:
+            return True
+
+        # Send transaction to all
+        self.client.emit("onSideChainTransaction", {
+            "roomId": self.name,
+            "transaction": transaction,
+        })
+
+        # Add the transaction to the pending transactions
+        self.pending_transactions.append(Transaction.GetSideChainCreateTransaction(transaction))
+        if self.pub_key == transaction['pub_key'] and changeChain:
+            self.waitForTransaction = transaction
+        return True
+
+    def checkNewChain(self):
+        if self.waitForTransaction:
+            for transaction in self.chain[-1]['transactions']:
+                if transaction['type'] == "SideChainCreateTransaction":
+                    if transaction['chainName'] == self.waitForTransaction['chainName'] and transaction['timestamp'] == self.waitForTransaction['timestamp']:
+                        break
+            else:
+                return
+
+            # clear all variables and start new chain
+            self._timer.cancel()
+            self.startChain(
+                self.waitForTransaction['chainName'],
+                int(self.waitForTransaction['totalCoins']),
+                int(self.waitForTransaction['difficultyTarget'], 16),
+                int(self.waitForTransaction['adjustAfterBlocks']),
+                int(self.waitForTransaction['timeForEachBlock']),
+                0,
+                1,
+                self.waitForTransaction['pub_key'],
+                int(self.waitForTransaction['minimum_fee']),
+                int(self.waitForTransaction['maximum_time']),
+                self.waitForTransaction['url'],
+                self.waitForTransaction['reflectorURL'],
+            )
+            self.waitForTransaction = None

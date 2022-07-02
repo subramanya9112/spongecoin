@@ -8,7 +8,9 @@ import { Crypt } from 'hybrid-crypto-js';
 import { v4 as uuidv4 } from "uuid";
 import Header from './../Header';
 import './index.scss';
+import Button from './../../basicComponents/Button';
 import Checkbox from './../../basicComponents/CheckBox';
+import GetURL from '../../../GetURL';
 
 export default function Index() {
     const navigate = useNavigate();
@@ -27,7 +29,7 @@ export default function Index() {
     // Get Reflector URL
     useEffect(() => {
         const getReflectorURL = async () => {
-            let res = await axios.post('http://localhost:3000/get_reflector_url');
+            let res = await axios.post(`${GetURL()}/get_reflector_url`);
             if (res.status !== 200 || res.data.status === false) {
                 return;
             }
@@ -46,7 +48,7 @@ export default function Index() {
                 return;
             }
             if (res.data.length !== 0) {
-                setMinerURL(res.data[0]);
+                setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
             }
         };
         if (chain_name !== undefined && reflectorURL !== '') {
@@ -135,7 +137,7 @@ export default function Index() {
                                 : <></>
                             }
                             {(inTransactAmount === (outTransactAmount + selfAmout) && inTransactAmount !== 0 && privatePem != null) ?
-                                <button
+                                <Button
                                     onClick={async () => {
                                         let crypt = new Crypt({
                                             aesStandard: 'AES-CBC',
@@ -190,7 +192,8 @@ export default function Index() {
                                             navigate(`/account/${chain_name}`);
                                         }
                                     }}
-                                >Transact</button>
+                                    name="Transact"
+                                />
                                 : <></>}
                         </div>
                     </div>

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import './index.scss';
 import Header from './../Header';
+import GetURL from '../../../GetURL';
 
 export default function Index() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function Index() {
   // Get Reflector URL
   useEffect(() => {
     const getReflectorURL = async () => {
-      let res = await axios.post('http://localhost:3000/get_reflector_url');
+      let res = await axios.post(`${GetURL()}/get_reflector_url`);
       if (res.status !== 200 || res.data.status === false) {
         return;
       }
@@ -34,7 +35,7 @@ export default function Index() {
         return;
       }
       if (res.data.length !== 0) {
-        setMinerURL(res.data[0]);
+        setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
       }
     };
     if (chain_name !== undefined && reflectorURL !== '') {
@@ -214,6 +215,58 @@ export default function Index() {
                       </div>
                     </Fragment>
                   )
+              })}
+            </div>
+          </div>
+        </Fragment>
+      )
+    } else if (transaction['type'] == "SideChainCreateTransaction") {
+      return (
+        <Fragment>
+          <div className='blockTransactionHeader'>SideChain Create Transaction</div>
+          <div className='blockCoinBase'>
+            <div className='blockCoinBaseKey'>Transaction ID</div>
+            <div className='blockCoinBaseValue'>{transaction['transactionId']}</div>
+          </div>
+          <div className='blockCoinBase'>
+            <div className='blockCoinBaseKey'>Public Key</div>
+            <div className='blockCoinBaseValue'>
+              {getPublicKeyDiv(transaction['pub_key'])}
+            </div>
+          </div>
+          <div className='blockCoinBase'>
+            <div className='blockCoinBaseKey'>Signature</div>
+            <div className='blockCoinBaseValue'>{transaction['signature']}</div>
+          </div>
+          <div className='blockCoinBase'>
+            <div className='blockCoinBaseKey'>Chain Name</div>
+            <div className='blockCoinBaseValue'>{transaction['timestamp']}</div>
+          </div>
+          <div className='blockCoinBase'>
+            <div className='blockCoinBaseKey'>Time Stamp</div>
+            <div className='blockCoinBaseValue'>{(new Date(transaction['timestamp'])).toLocaleString()}</div>
+          </div>
+          <div className='blockTranx'>
+            <div className='blockTranxHeader'>In Transaction</div>
+          </div>
+          <div className='blockTranx'>
+            <div className='blockTranxIn'>
+              {transaction['in'].map((tranx, index) => {
+                return (
+                  <Fragment key={index}>
+                    <div className='blockTranxInData'>
+                      <div className='blockTranxInDataHeader'>
+                        <div className='blockTranxInKey'>Transaction ID</div>
+                        <div className='blockTranxInValue'>{tranx['inId']}</div>
+                      </div>
+                      <div className='blockTranxInDataHeader'>
+                        <div className='blockTranxInKey'>Amount</div>
+                        <div className='blockTranxInValue'>{tranx['amount']}</div>
+                      </div>
+                    </div>
+                    <div className='blockTranxLineBreak' />
+                  </Fragment>
+                );
               })}
             </div>
           </div>
