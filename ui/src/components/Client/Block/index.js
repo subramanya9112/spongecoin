@@ -213,6 +213,7 @@ export default function Index() {
                           <div className='blockTranxOutValue'>{tranx['amount']}</div>
                         </div>
                       </div>
+                      <div className='blockTranxLineBreak' />
                     </Fragment>
                   )
               })}

@@ -212,6 +212,7 @@ export default function Index() {
                                                     <div className='transactionTranxOutValue'>{tranx['amount']}</div>
                                                 </div>
                                             </div>
+                                            <div className='transactionTranxLineBreak' />
                                         </Fragment>
                                     )
                             })}
@@ -220,7 +221,6 @@ export default function Index() {
                 </Fragment>
             )
         } else if (transaction['type'] == "SideChainCreateTransaction") {
-            console.log(transaction);
             return (
                 <Fragment>
                     <div className='transactionHeader'>SideChain Create Transaction</div>
