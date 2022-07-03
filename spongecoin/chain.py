@@ -7,6 +7,7 @@ from Crypto.PublicKey import RSA
 from threading import Timer, Thread
 
 import requests
+from MerkleTree import MerkelTree
 from transaction import Transaction
 from client_ws import ClientWS
 
@@ -366,6 +367,10 @@ class Chain:
         if len(self.chain) != 0 and block['previousBlockHash'] != self.chain[-1]['hash']:
             return
 
+        # Check merkle hash
+        if block['merkleHash'] != MerkelTree.merkel_tree(block['transactions'], first=True):
+            return
+
         # Check only one coinbase transaction
         coinbase_transaction = block['transactions'][0]
         if coinbase_transaction['type'] != "CoinBaseTransaction":
@@ -427,6 +432,7 @@ class Chain:
         block['difficultyTarget'] = str(int(self.difficultyTarget))
         block['height'] = len(self.chain) + 1
         block['num_transaction'] = len(self.pending_transactions)
+        block['merkleHash'] = MerkelTree.merkel_tree(self.pending_transactions, first=True)
         block['transactions'] = self.pending_transactions
         return block
 

@@ -324,6 +324,10 @@ export default function Index() {
                 <div className="blockValue">{block['hash']}</div>
               </div>
               <div className="blockData">
+                <div className="blockKey">Merkle root</div>
+                <div className="blockValue">{block['merkleHash']}</div>
+              </div>
+              <div className="blockData">
                 <div className="blockKey">Previous Hash</div>
                 <div className="blockValue">{block['previousBlockHash']}</div>
               </div>
