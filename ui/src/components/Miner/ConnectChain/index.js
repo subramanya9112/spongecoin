@@ -13,7 +13,6 @@ import GetURL from '../../../GetURL';
 
 export default function Index() {
     const navigate = useNavigate();
-    const cancelTokenSource = useRef();
     const [chain, setChain] = useState("");
     const [chains, setChains] = useState([]);
     const [minimumFee, setMinimumFee] = useState(5);
@@ -29,17 +28,12 @@ export default function Index() {
 
     useEffect(() => {
         let getChains = async () => {
-            if (cancelTokenSource.current)
-                cancelTokenSource.current.cancel();
-            cancelTokenSource.current = axios.CancelToken.source();
-            let res = await axios.post(`${reflectorURL}/chains`, {
-                cancelToken: cancelTokenSource.current.token
-            });
-            if (res.status != 200) return;
+            let res = await axios.post(`http://reflector.localhost/chains`);
+            if (res.status !== 200) return;
             setChains(res.data);
         }
         getChains().catch(console.error)
-    }, [reflectorURL]);
+    }, []);
 
     return (
         <Header
@@ -122,7 +116,7 @@ export default function Index() {
                                 reflectorURL,
                             });
                             console.log(res.data)
-                            if (res.data.status == true) {
+                            if (res.data.status === true) {
                                 navigate('/');
                             }
                         }}

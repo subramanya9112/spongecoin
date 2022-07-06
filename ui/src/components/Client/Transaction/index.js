@@ -3,26 +3,13 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Header from './../Header';
 import './index.scss';
-import GetURL from '../../../GetURL';
 
 export default function Index() {
     let { transaction_id, chain_name } = useParams();
 
-    const [reflectorURL, setReflectorURL] = useState('');
+    const reflectorURL = "http://reflector.localhost";
     const [minerURL, setMinerURL] = useState('');
     const [transaction, setTransaction] = useState(null);
-
-    // Get Reflector URL
-    useEffect(() => {
-        const getReflectorURL = async () => {
-            let res = await axios.post(`${GetURL()}/get_reflector_url`);
-            if (res.status !== 200 || res.data.status === false) {
-                return;
-            }
-            setReflectorURL(res.data.reflector_url);
-        }
-        getReflectorURL().catch(console.error);
-    }, [setReflectorURL]);
 
     // Get Miner URL
     useEffect(() => {
@@ -37,10 +24,10 @@ export default function Index() {
                 setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
             }
         };
-        if (chain_name !== undefined && reflectorURL !== '') {
+        if (chain_name !== undefined) {
             getMinerURL().catch(console.error);
         }
-    }, [chain_name, reflectorURL]);
+    }, [chain_name]);
 
     // Get Block Details
     useEffect(() => {
@@ -56,7 +43,7 @@ export default function Index() {
         if (minerURL && minerURL !== '') {
             getTransactionDetails().catch(console.error);
         }
-    }, [minerURL]);
+    }, [minerURL, transaction_id]);
 
     let getPublicKeyDiv = (pub_key) => {
         return pub_key.split('\n').map((val, index) => {
@@ -123,7 +110,7 @@ export default function Index() {
                     </div>
                 </Fragment>
             );
-        } else if (transaction['type'] == "Transaction") {
+        } else if (transaction['type'] === "Transaction") {
             return (
                 <Fragment>
                     <div className='transactionHeader'>Transaction</div>
@@ -171,7 +158,7 @@ export default function Index() {
                         </div>
                         <div className='transactionTranxOut'>
                             {transaction['out'].map((tranx, index) => {
-                                if (tranx['type'] == "transfer")
+                                if (tranx['type'] === "transfer")
                                     return (
                                         <Fragment key={index}>
                                             <div className='transactionTranxOutData' >
@@ -220,7 +207,7 @@ export default function Index() {
                     </div>
                 </Fragment>
             )
-        } else if (transaction['type'] == "SideChainCreateTransaction") {
+        } else if (transaction['type'] === "SideChainCreateTransaction") {
             return (
                 <Fragment>
                     <div className='transactionHeader'>SideChain Create Transaction</div>

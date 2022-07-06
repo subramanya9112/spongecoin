@@ -141,8 +141,9 @@ class Chain:
         self.waitForTransaction = None
 
         # Get the data from clients
-        for url in urls:
-            res = requests.post(url + "/aboutChain")
+        for urld in urls:
+            urld = urld.replace(".localhost", "")
+            res = requests.post(urld + "/aboutChain")
             if res.status_code != 200:
                 print("Error: " + res.text)
                 continue
@@ -159,7 +160,7 @@ class Chain:
             self.subsidyHalvingInterval = data['subsidyHalvingInterval']
 
             # Get the chain
-            res = requests.post(url + "/chain")
+            res = requests.post(urld + "/chain")
             if res.status_code != 200:
                 print("Error: " + res.text)
                 continue
@@ -225,7 +226,8 @@ class Chain:
             if self.stop:
                 return
             block['nonce'] = str(random.getrandbits(128))
-            hash = int(SHA256.new(str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
+            hash = int(SHA256.new(
+                str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
             if hash < self.difficultyTarget:
                 block['hash'] = str(hash)
                 break
@@ -258,10 +260,12 @@ class Chain:
             for outTransaction in transaction['out']:
                 if outTransaction['type'] == "transfer":
                     if outTransaction['receiver_pub_key'] == pub_key:
-                        transactions[outTransaction['outId']] = outTransaction['amount']
+                        transactions[outTransaction['outId']
+                                     ] = outTransaction['amount']
                 elif outTransaction['type'] == "reward":
                     if add_reward:
-                        transactions[outTransaction['outId']] = outTransaction['amount']
+                        transactions[outTransaction['outId']
+                                     ] = outTransaction['amount']
         if transaction['type'] == "SideChainCreateTransaction":
             if transaction['pub_key'] == pub_key:
                 for inTransaction in transaction['in']:
@@ -275,7 +279,8 @@ class Chain:
             if coinbase['pub_key'] == pub_key:
                 transactions[coinbase['transactionId']] = coinbase['subsidy']
             for transaction in block['transactions'][1:]:
-                self.getUTXOsInTransaction(transactions, transaction, pub_key, coinbase['pub_key'] == pub_key)
+                self.getUTXOsInTransaction(
+                    transactions, transaction, pub_key, coinbase['pub_key'] == pub_key)
         return transactions
 
     def onTransaction(self, transaction, add=True) -> bool:
@@ -286,7 +291,8 @@ class Chain:
         hash_verify = PKCS1_v1_5.new(pub_key)
         try:
             data = json.dumps(transaction, separators=(',', ':'))
-            hash_verify.verify(SHA256.new(data=bytes(data, encoding="utf-8")), signature=signature)
+            hash_verify.verify(SHA256.new(data=bytes(
+                data, encoding="utf-8")), signature=signature)
         except Exception as e:
             print(e)
             return False
@@ -296,7 +302,8 @@ class Chain:
         # Verify has balance using the chain data and also the pending_transactions
         transactions = self.getUTXOs(transaction['pub_key'])
         for pendingTransaction in self.pending_transactions:
-            self.getUTXOsInTransaction(transactions, pendingTransaction, transaction['pub_key'], False)
+            self.getUTXOsInTransaction(
+                transactions, pendingTransaction, transaction['pub_key'], False)
 
         inAmt = 0
         for tranx in transaction['in']:
@@ -324,13 +331,15 @@ class Chain:
         })
 
         # Add the transaction to the pending transactions
-        self.pending_transactions.append(Transaction.GetTransaction(transaction))
+        self.pending_transactions.append(
+            Transaction.GetTransaction(transaction))
 
         # If transaction_fee is not enough return, else call mine
         if transaction['type'] == "Transaction":
             for outTransaction in transaction['out']:
                 if outTransaction['type'] == "reward":
-                    self.pending_transactions_fee += float(outTransaction['amount'])
+                    self.pending_transactions_fee += float(
+                        outTransaction['amount'])
         if self.pending_transactions_fee > self.minimum_fee:
             self.stop = True
             Timer(0, self.mine).start()
@@ -357,7 +366,8 @@ class Chain:
         # Verify the block hash
         oldHash = block['hash']
         del block['hash']
-        hash = int(SHA256.new(str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
+        hash = int(SHA256.new(
+            str(json.dumps(block)).encode('utf-8')).hexdigest(), 16)
         self.adjustDifficultyTarget()
         if hash > self.difficultyTarget or str(hash) != oldHash:
             return
@@ -427,12 +437,14 @@ class Chain:
     def create_block(self):
         block = {}
         block['version'] = 1
-        block['previousBlockHash'] = self.chain[-1]['hash'] if len(self.chain) != 0 else "0"
+        block['previousBlockHash'] = self.chain[-1]['hash'] if len(
+            self.chain) != 0 else "0"
         block['timestamp'] = (time.time() * 1000) + random.random()
         block['difficultyTarget'] = str(int(self.difficultyTarget))
         block['height'] = len(self.chain) + 1
         block['num_transaction'] = len(self.pending_transactions)
-        block['merkleHash'] = MerkelTree.merkel_tree(self.pending_transactions, first=True)
+        block['merkleHash'] = MerkelTree.merkel_tree(
+            self.pending_transactions, first=True)
         block['transactions'] = self.pending_transactions
         return block
 
@@ -503,7 +515,8 @@ class Chain:
         hash_verify = PKCS1_v1_5.new(pub_key)
         try:
             data = json.dumps(transaction, separators=(',', ':'))
-            hash_verify.verify(SHA256.new(data=bytes(data, encoding="utf-8")), signature=signature)
+            hash_verify.verify(SHA256.new(data=bytes(
+                data, encoding="utf-8")), signature=signature)
         except Exception as e:
             print(e)
             return False
@@ -513,7 +526,8 @@ class Chain:
         # Verify has balance using the chain data and also the pending_transactions
         transactions = self.getUTXOs(transaction['pub_key'])
         for pendingTransaction in self.pending_transactions:
-            self.getUTXOsInTransaction(transactions, pendingTransaction, transaction['pub_key'], False)
+            self.getUTXOsInTransaction(
+                transactions, pendingTransaction, transaction['pub_key'], False)
 
         inAmt = 0
         for tranx in transaction['in']:
@@ -537,7 +551,8 @@ class Chain:
         })
 
         # Add the transaction to the pending transactions
-        self.pending_transactions.append(Transaction.GetSideChainCreateTransaction(transaction))
+        self.pending_transactions.append(
+            Transaction.GetSideChainCreateTransaction(transaction))
         if self.pub_key == transaction['pub_key'] and changeChain:
             self.waitForTransaction = transaction
         return True

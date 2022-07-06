@@ -170,7 +170,7 @@ export default function Index() {
                                 url: GetURL(),
                                 reflectorURL,
                             });
-                            if (res.data.status == true) {
+                            if (res.data.status === true) {
                                 navigate('/');
                             }
                         }}

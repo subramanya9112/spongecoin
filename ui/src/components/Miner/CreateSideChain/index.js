@@ -108,7 +108,6 @@ export default function Index() {
                                         difficultyTarget,
                                         adjustAfterBlocks,
                                         timeForEachBlock,
-                                        pub_key,
                                         minimum_fee: minimumFee,
                                         maximum_time: maximumTime,
                                         url: GetURL(),
@@ -131,7 +130,7 @@ export default function Index() {
                                     let res = await axios.post(`${GetURL()}/create_sidechain`, {
                                         transaction: data
                                     });
-                                    if (res.status == 200 && res.data.status === true) {
+                                    if (res.status === 200 && res.data.status === true) {
                                         navigate('/');
                                     }
                                 }}

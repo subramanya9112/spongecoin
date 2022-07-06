@@ -6,29 +6,16 @@ import Header from './../Header';
 import Button from './../../basicComponents/Button';
 import CallReceivedIcon from '@mui/icons-material/CallReceived';
 import CallMadeIcon from '@mui/icons-material/CallMade';
-import GetURL from '../../../GetURL';
 
 export default function Index() {
     const navigate = useNavigate();
     let { chain_name } = useParams();
 
-    const [reflectorURL, setReflectorURL] = useState('');
+    const reflectorURL = "http://reflector.localhost";
     const [minerURL, setMinerURL] = useState('');
     const [coins, setCoins] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [amount, setAmount] = useState(0);
-
-    // Get Reflector URL
-    useEffect(() => {
-        const getReflectorURL = async () => {
-            let res = await axios.post(`${GetURL()}/get_reflector_url`);
-            if (res.status !== 200 || res.data.status === false) {
-                return;
-            }
-            setReflectorURL(res.data.reflector_url);
-        }
-        getReflectorURL().catch(console.error);
-    }, [setReflectorURL]);
 
     // Get Sidebar chain details
     useEffect(() => {
@@ -39,10 +26,8 @@ export default function Index() {
             }
             setCoins(res.data);
         }
-        if (reflectorURL !== '') {
-            getChains().catch(console.error);
-        }
-    }, [reflectorURL, setCoins]);
+        getChains().catch(console.error);
+    }, [setCoins]);
 
     // Get Miner URL
     useEffect(() => {
@@ -57,10 +42,10 @@ export default function Index() {
                 setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
             }
         };
-        if (chain_name !== undefined && reflectorURL !== '') {
+        if (chain_name !== undefined) {
             getMinerURL().catch(console.error);
         }
-    }, [chain_name, reflectorURL]);
+    }, [chain_name]);
 
     useEffect(() => {
         let getTransactions = async () => {

@@ -109,6 +109,7 @@ app.post('/minersCount', (req, res) => {
 app.get('/', (req, res) => {
     url = chain.getURL();
     if (url) {
+        url = url.replace("server", "client");
         res.redirect(url)
     } else {
         res.send('Sorry, No client is up');

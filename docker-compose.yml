@@ -1,11 +1,23 @@
 version: "3.9"
 
 services:
-  spongecoin:
+  reflector:
+    build:
+      context: .
+      dockerfile: reflector/Dockerfile
+  server1:
     build:
       context: .
       dockerfile: spongecoin/Dockerfile
-  ui:
+  server2:
+    build:
+      context: .
+      dockerfile: spongecoin/Dockerfile2
+  client1:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+  client2:
     build:
       context: .
       dockerfile: ui/Dockerfile

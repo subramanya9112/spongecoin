@@ -10,13 +10,12 @@ import Header from './../Header';
 import './index.scss';
 import Button from './../../basicComponents/Button';
 import Checkbox from './../../basicComponents/CheckBox';
-import GetURL from '../../../GetURL';
 
 export default function Index() {
     const navigate = useNavigate();
     let { chain_name } = useParams();
 
-    const [reflectorURL, setReflectorURL] = useState('');
+    const reflectorURL = "http://reflector.localhost";
     const [minerURL, setMinerURL] = useState('');
     const [amount, setAmount] = useState(0);
     const [inTransactAmount, setInTransactAmount] = useState(0);
@@ -25,18 +24,6 @@ export default function Index() {
     const [utxos, setUTXOs] = useState([]);
     const [outTransaction, setOutTransaction] = useState([]);
     const [privatePem, setPrivatePem] = useState(null);
-
-    // Get Reflector URL
-    useEffect(() => {
-        const getReflectorURL = async () => {
-            let res = await axios.post(`${GetURL()}/get_reflector_url`);
-            if (res.status !== 200 || res.data.status === false) {
-                return;
-            }
-            setReflectorURL(res.data.reflector_url);
-        }
-        getReflectorURL().catch(console.error);
-    }, [setReflectorURL]);
 
     // Get Miner URL
     useEffect(() => {
@@ -51,10 +38,10 @@ export default function Index() {
                 setMinerURL(res.data[Math.floor(Math.random() * res.data.length)]);
             }
         };
-        if (chain_name !== undefined && reflectorURL !== '') {
+        if (chain_name !== undefined) {
             getMinerURL().catch(console.error);
         }
-    }, [chain_name, reflectorURL]);
+    }, [chain_name]);
 
     useEffect(() => {
         let getUTXOs = async () => {

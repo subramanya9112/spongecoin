@@ -75,8 +75,8 @@ def start():
 
         name = data['name']
         pub_key = data['pub_key']
-        minimum_fee = data['minimum_fee']
-        maximum_time = data['maximum_time']
+        minimum_fee = int(data['minimum_fee'])
+        maximum_time = int(data['maximum_time'])
         url = data['url']
         reflectorURL = data['reflectorURL']
 
