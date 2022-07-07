@@ -18,6 +18,8 @@ export default function Index() {
     const [difficultyTarget, setDifficultyTarget] = useState("0x0000ffff00000000000000000000000000000000000000000000000000000000");
     const [adjustAfterBlocks, setAdjustAfterBlocks] = useState(14400);
     const [timeForEachBlock, setTimeForEachBlock] = useState(6000);
+    const [subsidy, setSubsidy] = useState(50);
+    const [subsidyHalvingInterval, setSubsidyHalvingInterval] = useState(14400);
     const [minimumFee, setMinimumFee] = useState(5);
     const [maximumTime, setMaximumTime] = useState(1200);
     const [reflectorURL, setReflectorURL] = useState("");
@@ -108,6 +110,8 @@ export default function Index() {
                                         difficultyTarget,
                                         adjustAfterBlocks,
                                         timeForEachBlock,
+                                        subsidy,
+                                        subsidyHalvingInterval,
                                         minimum_fee: minimumFee,
                                         maximum_time: maximumTime,
                                         url: GetURL(),
@@ -216,6 +220,26 @@ export default function Index() {
                                     flex: "1",
                                 }}
                                 onChange={(val) => setTimeForEachBlock(val)}
+                                type="number"
+                            />
+                            <Input
+                                name="Subsidy"
+                                value={subsidy}
+                                style={{
+                                    width: "100%",
+                                    flex: "1",
+                                }}
+                                onChange={(val) => setSubsidy(val)}
+                                type="number"
+                            />
+                            <Input
+                                name="Subsidy Halving Interval"
+                                value={subsidyHalvingInterval}
+                                style={{
+                                    width: "100%",
+                                    flex: "1",
+                                }}
+                                onChange={(val) => setSubsidyHalvingInterval(val)}
                                 type="number"
                             />
                             <Input
