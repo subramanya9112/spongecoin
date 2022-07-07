@@ -80,7 +80,7 @@ export default function Index() {
                     <div className='accountTransactionImage'><CallReceivedIcon style={{ color: "green" }} /></div>
                 </div>
             );
-        else {
+        else if (transaction['type'] === "Transaction") {
             return (
                 <div
                     className='accountTransaction'
@@ -96,6 +96,23 @@ export default function Index() {
                             <CallReceivedIcon style={{ color: "green" }} />
                             : <CallMadeIcon style={{ color: "red" }} />
                         }
+                    </div>
+                </div>
+            );
+        }
+        else if (transaction['type'] === "SideChainCreateTransaction") {
+            return (
+                <div
+                    className='accountTransaction'
+                    onClick={() => {
+                        navigate(`/transaction/${transaction['transactionId']}/${chain_name}`)
+                    }}
+                >
+                    <div className='accountTransactionTransactionId'>{transaction['transactionId']}</div>
+                    <div className='accountTransactionTimeStamp'>{(new Date(transaction['timestamp'])).toLocaleString()}</div>
+                    <div className='accountTransactionSubsidy'>{transaction['amount']}</div>
+                    <div className='accountTransactionImage'>
+                        <CallMadeIcon style={{ color: "red" }} />
                     </div>
                 </div>
             );
