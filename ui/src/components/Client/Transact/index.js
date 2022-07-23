@@ -23,7 +23,6 @@ export default function Index() {
     const [selfAmout, setSelfAmount] = useState(0);
     const [utxos, setUTXOs] = useState([]);
     const [outTransaction, setOutTransaction] = useState([]);
-    const [privatePem, setPrivatePem] = useState(null);
 
     // Get Miner URL
     useEffect(() => {
@@ -83,15 +82,6 @@ export default function Index() {
         }
     }, [minerURL]);
 
-    const loadPrivateKey = (fileName) => {
-        const reader = new FileReader();
-        reader.addEventListener('load', (event) => {
-            let privateKey = event.target.result;
-            setPrivatePem(privateKey);
-        });
-        reader.readAsText(fileName);
-    };
-
     return (
         <Header
             content={
@@ -100,30 +90,7 @@ export default function Index() {
                         <div>Transact</div>
                         <div className='transactHeaderRight'>
                             <div>Balance: {amount}</div>
-                            {privatePem === null ?
-                                <div className='transactPrivateFile'>
-                                    Choose Private File
-                                    <input
-                                        type="file"
-                                        name="file"
-                                        accept=".pem"
-                                        onChange={(e) => {
-                                            e.preventDefault();
-                                            if (e.target.files) {
-                                                for (var i = 0; i < e.target.files.length; i++) {
-                                                    var file = e.target.files[i];
-                                                    if (file.name.endsWith('.pem')) {
-                                                        loadPrivateKey(file);
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </div>
-                                : <></>
-                            }
-                            {(inTransactAmount === (outTransactAmount + selfAmout) && inTransactAmount !== 0 && privatePem != null) ?
+                            {(inTransactAmount === (outTransactAmount + selfAmout) && inTransactAmount !== 0) ?
                                 <Button
                                     onClick={async () => {
                                         let crypt = new Crypt({
@@ -131,6 +98,7 @@ export default function Index() {
                                             rsaStandard: 'RSAES-PKCS1-V1_5',
                                         });
                                         let pub_key = window.localStorage.getItem('sponge_coin_public_key');
+                                        let pri_key = window.localStorage.getItem('sponge_coin_private_key');
                                         let data = {
                                             pub_key: pub_key,
                                             in: utxos.reduce((acc, cur) => {
@@ -166,7 +134,7 @@ export default function Index() {
                                             }]),
                                             timestamp: (new Date()).getTime(),
                                         };
-                                        let signature = JSON.parse(crypt.signature(privatePem, JSON.stringify(data)))['signature'];
+                                        let signature = JSON.parse(crypt.signature(pri_key, JSON.stringify(data)))['signature'];
                                         data['signature'] = signature;
 
                                         let res = await axios.post(minerURL + "/on_transaction", {

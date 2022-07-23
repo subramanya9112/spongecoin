@@ -234,14 +234,12 @@ class Chain:
 
         if self.stop:
             return
-        self.chain.append(block)
 
         # Send to all
         self.client.emit("onBlock", {
             "roomId": self.name,
             "block": block,
         })
-        self.checkNewChain()
         self.startTimer()
 
     def mine(self) -> None:

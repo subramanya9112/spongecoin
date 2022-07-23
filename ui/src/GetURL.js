@@ -15,13 +15,8 @@ export default function GetURL() {
     } if (parseResult.type === ParseResultType.Reserved) {
         const labels = parseResult.labels;
         let url;
-        if (labels[0] === "client1") {
-            labels.shift();
-            url = ["server1", ...labels].join('.');
-        } else {
-            labels.shift();
-            url = ["server2", ...labels].join('.');
-        }
+        labels.shift();
+        url = ["server", ...labels].join('.');
         return window.location.protocol + "//" + url;
     }
     return "";

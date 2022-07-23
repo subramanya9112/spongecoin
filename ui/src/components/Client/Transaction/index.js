@@ -94,7 +94,7 @@ export default function Index() {
                     </div>
                     <div className='transactionData'>
                         <div className='transactionKey'>Time for each Block</div>
-                        <div className='transactionValue'>{transaction['timeForEachBlock']}</div>
+                        <div className='transactionValue'>{transaction['timeForEachBlock']} ms</div>
                     </div>
                     <div className='transactionData'>
                         <div className='transactionKey'>Difficulty Target</div>
@@ -106,7 +106,7 @@ export default function Index() {
                     </div>
                     <div className='transactionData'>
                         <div className='transactionKey'>Subsidy Halving Interval</div>
-                        <div className='transactionValue'>{transaction['subsidyHalvingInterval']}</div>
+                        <div className='transactionValue'>{transaction['subsidyHalvingInterval']} ms</div>
                     </div>
                 </Fragment>
             );
@@ -251,7 +251,7 @@ export default function Index() {
                     </div>
                     <div className='transactionData'>
                         <div className='transactionKey'>Time for each Block</div>
-                        <div className='transactionValue'>{transaction['timeForEachBlock']}</div>
+                        <div className='transactionValue'>{transaction['timeForEachBlock']} ms</div>
                     </div>
                     <div className='transactionData'>
                         <div className='transactionKey'>Difficulty Target</div>

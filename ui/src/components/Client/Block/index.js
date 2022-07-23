@@ -95,7 +95,7 @@ export default function Index() {
           </div>
           <div className='blockCoinBase'>
             <div className='blockCoinBaseKey'>Time for each Block</div>
-            <div className='blockCoinBaseValue'>{transaction['timeForEachBlock']}</div>
+            <div className='blockCoinBaseValue'>{transaction['timeForEachBlock']} ms</div>
           </div>
           <div className='blockCoinBase'>
             <div className='blockCoinBaseKey'>Difficulty Target</div>
@@ -107,7 +107,7 @@ export default function Index() {
           </div>
           <div className='blockCoinBase'>
             <div className='blockCoinBaseKey'>Subsidy Halving Interval</div>
-            <div className='blockCoinBaseValue'>{transaction['subsidyHalvingInterval']}</div>
+            <div className='blockCoinBaseValue'>{transaction['subsidyHalvingInterval']} ms</div>
           </div>
         </Fragment>
       );

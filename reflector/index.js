@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
     socket.on('onBlock', (data) => {
         const { roomId, block } = data;
         if (roomId && block) {
-            socket.broadcast.to(roomId).emit('onBlock', {
+            io.in(roomId).emit('onBlock', {
                 roomId,
                 block,
             });

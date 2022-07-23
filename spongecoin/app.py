@@ -28,12 +28,12 @@ def startSpongeCoin():
         data = request.json
 
         name = data['name']
-        totalCoins = int(data['totalCoins'])
-        difficultyTarget = int(data['difficultyTarget'], 16)
-        adjustAfterBlocks = int(data['adjustAfterBlocks'])
-        timeForEachBlock = int(data['timeForEachBlock'])
-        subsidy = float(data['subsidy'])
-        subsidyHalvingInterval = float(data['subsidyHalvingInterval'])
+        totalCoins = 1000000
+        difficultyTarget = 0x0000ffff00000000000000000000000000000000000000000000000000000000
+        adjustAfterBlocks = 14400
+        timeForEachBlock = 60
+        subsidy = 50
+        subsidyHalvingInterval = 14400
         pub_key = data['pub_key']
         minimum_fee = float(data['minimum_fee'])
         maximum_time = int(data['maximum_time'])

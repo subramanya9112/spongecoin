@@ -5,19 +5,11 @@ services:
     build:
       context: .
       dockerfile: reflector/Dockerfile
-  server1:
+  server:
     build:
       context: .
       dockerfile: spongecoin/Dockerfile
-  server2:
-    build:
-      context: .
-      dockerfile: spongecoin/Dockerfile2
-  client1:
-    build:
-      context: .
-      dockerfile: ui/Dockerfile
-  client2:
+  client:
     build:
       context: .
       dockerfile: ui/Dockerfile
