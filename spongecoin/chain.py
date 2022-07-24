@@ -404,7 +404,7 @@ class Chain:
                 transactionId = transaction['transactionId']
                 del transaction['type']
                 del transaction['transactionId']
-                valid = self.onTransaction(transaction, False)
+                valid = self.createSideChain(transaction, False)
                 if not valid:
                     return
                 transaction['type'] = type
