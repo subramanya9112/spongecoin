@@ -122,7 +122,7 @@ export default function Index() {
                                                         type: "transfer",
                                                         outId: uuidv4().replaceAll('-', ''),
                                                         amount: cur.amount,
-                                                        receiver_pub_key: cur.pub_key,
+                                                        receiver_pub_key: cur.pub_key.replace('\n', '\r\n'),
                                                     }];
                                                 }
                                                 return acc;

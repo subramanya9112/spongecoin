@@ -11,7 +11,6 @@ export default function Index() {
     const navigate = useNavigate();
     const [minimumFee, setMinimumFee] = useState(5);
     const [maximumTime, setMaximumTime] = useState(1200);
-    const [reflectorURL, setReflectorURL] = useState("");
 
     useEffect(() => {
         let pub_key = window.localStorage.getItem('sponge_coin_public_key');
@@ -51,18 +50,6 @@ export default function Index() {
                             type="number"
                         />
                     </div>
-                    <div className="startSpongeCoinDiv">
-                        <div className="startSpongeCoinKey">Reflector URL</div>
-                        <Input
-                            name="Reflector URL"
-                            value={reflectorURL}
-                            style={{
-                                width: "100%",
-                                flex: "1",
-                            }}
-                            onChange={(val) => setReflectorURL(val)}
-                        />
-                    </div>
                     <Button
                         style={{
                             width: "100%",
@@ -79,7 +66,7 @@ export default function Index() {
                                 minimum_fee: minimumFee,
                                 maximum_time: maximumTime,
                                 url: GetURL(),
-                                reflectorURL,
+                                reflectorURL: 'http://reflector.subramanya.com',
                             });
                             if (res.data.status === true) {
                                 navigate('/');

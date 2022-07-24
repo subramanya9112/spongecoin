@@ -16,7 +16,6 @@ export default function Index() {
     const [chainName, setChainName] = useState("");
     const [minimumFee, setMinimumFee] = useState(5);
     const [maximumTime, setMaximumTime] = useState(1200);
-    const [reflectorURL, setReflectorURL] = useState("");
 
     useEffect(() => {
         let pub_key = window.localStorage.getItem('sponge_coin_public_key');
@@ -80,7 +79,7 @@ export default function Index() {
                                     maximum_time: maximumTime,
                                     url: GetURL(),
                                     amount: inTransactAmount,
-                                    reflectorURL,
+                                    reflectorURL:'http://reflector.subramanya.com',
                                     timestamp: (new Date()).getTime(),
                                     in: utxos.reduce((acc, cur) => {
                                         if (cur.checked) {
@@ -165,15 +164,6 @@ export default function Index() {
                                 }}
                                 onChange={(val) => setMaximumTime(val)}
                                 type="number"
-                            />
-                            <Input
-                                name="Reflector URL"
-                                value={reflectorURL}
-                                style={{
-                                    width: "100%",
-                                    flex: "1",
-                                }}
-                                onChange={(val) => setReflectorURL(val)}
                             />
                         </div>
                     </div>
