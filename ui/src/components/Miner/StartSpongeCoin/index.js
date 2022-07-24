@@ -75,6 +75,7 @@ export default function Index() {
                             if (!pub_key) navigate('/login');
                             let res = await axios.post(`${GetURL()}/startSpongeCoin`, {
                                 name: "Sponge Coin",
+                                pub_key,
                                 minimum_fee: minimumFee,
                                 maximum_time: maximumTime,
                                 url: GetURL(),
