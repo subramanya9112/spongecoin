@@ -486,6 +486,13 @@ class Chain:
                         else:
                             if outs['receiver_pub_key'] == accountId:
                                 amount += float(outs['amount'])
+                                transactions.append({
+                                    'type': 'Transaction',
+                                    'transactionId': outs['outId'],
+                                    'timestamp': transaction['timestamp'],
+                                    'amount': outs['amount'],
+                                    'types': "in",
+                                })
                             elif transaction['pub_key'] == accountId:
                                 transactions.append({
                                     'type': 'Transaction',
