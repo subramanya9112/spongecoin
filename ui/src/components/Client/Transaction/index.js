@@ -7,7 +7,7 @@ import './index.scss';
 export default function Index() {
     let { transaction_id, chain_name } = useParams();
 
-    const reflectorURL = "http://reflector.localhost";
+    const reflectorURL = "http://reflector.subramanya.com";
     const [minerURL, setMinerURL] = useState('');
     const [transaction, setTransaction] = useState(null);
 

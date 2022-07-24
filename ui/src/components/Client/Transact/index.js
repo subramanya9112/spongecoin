@@ -15,7 +15,7 @@ export default function Index() {
     const navigate = useNavigate();
     let { chain_name } = useParams();
 
-    const reflectorURL = "http://reflector.localhost";
+    const reflectorURL = "http://reflector.subramanya.com";
     const [minerURL, setMinerURL] = useState('');
     const [amount, setAmount] = useState(0);
     const [inTransactAmount, setInTransactAmount] = useState(0);

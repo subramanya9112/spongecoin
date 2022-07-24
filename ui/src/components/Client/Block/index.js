@@ -8,7 +8,7 @@ export default function Index() {
   const navigate = useNavigate();
   let { block_index, chain_name } = useParams();
 
-  const reflectorURL = "http://reflector.localhost";
+  const reflectorURL = "http://reflector.subramanya.com";
   const [minerURL, setMinerURL] = useState('');
   const [block, setBlock] = useState(null);
 

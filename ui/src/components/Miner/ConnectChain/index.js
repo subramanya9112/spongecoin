@@ -28,7 +28,7 @@ export default function Index() {
 
     useEffect(() => {
         let getChains = async () => {
-            let res = await axios.post(`http://reflector.localhost/chains`);
+            let res = await axios.post(`http://reflector.subramanya.com/chains`);
             if (res.status !== 200) return;
             setChains(res.data);
         }

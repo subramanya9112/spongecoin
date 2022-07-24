@@ -10,7 +10,7 @@ export default function GetURL() {
         const { subDomains, domain, topLevelDomains } = parseResult;
 
         subDomains.shift();
-        let url = ["spongecoin", ...subDomains, domain, ...topLevelDomains].join('.');
+        let url = ["server", ...subDomains, domain, ...topLevelDomains].join('.');
         return window.location.protocol + "//" + url;
     } if (parseResult.type === ParseResultType.Reserved) {
         const labels = parseResult.labels;
