@@ -157,7 +157,7 @@ export default function Index() {
                                 type="number"
                             />
                             <Input
-                                name="Maximum Time"
+                                name="Maximum Time (ms)"
                                 value={maximumTime}
                                 style={{
                                     width: "100%",

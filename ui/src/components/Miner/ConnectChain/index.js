@@ -75,7 +75,7 @@ export default function Index() {
                     <div className="connectChainDiv">
                         <div className="connectChainKey">Maximum Time</div>
                         <Input
-                            name="Maximum Time"
+                            name="Maximum Time (ms)"
                             value={maximumTime}
                             style={{
                                 width: "100%",

@@ -41,7 +41,7 @@ export default function Index() {
                     <div className="startSpongeCoinDiv">
                         <div className="startSpongeCoinKey">Maximum Time</div>
                         <Input
-                            name="Maximum Time"
+                            name="Maximum Time (ms)"
                             value={maximumTime}
                             style={{
                                 width: "100%",
